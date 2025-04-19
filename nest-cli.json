@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/e-sehha/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/e-sehha/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/e-sehha",
+  "projects": {
+    "e-sehha": {
+      "type": "application",
+      "root": "apps/e-sehha",
+      "entryFile": "main",
+      "sourceRoot": "apps/e-sehha/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/e-sehha/tsconfig.app.json"
+      }
+    },
+    "patients": {
+      "type": "application",
+      "root": "apps/patients",
+      "entryFile": "main",
+      "sourceRoot": "apps/patients/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/patients/tsconfig.app.json"
+      }
+    }
+  }
+}
