@@ -11,5 +11,12 @@ export class UsersController {
   async getMe(@CurrentUser('id') id: string){
     return this.usersService.getMe(id);
   }
+
+  @Get()
+  @UseGuards(AuthGuard)
+  //@UseGuards(AdminGuard)
+  async getUsers(){
+    return this.usersService.getUsers();
+  }
   
 }

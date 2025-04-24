@@ -9,4 +9,12 @@ export class UsersService {
     }
     return user;
   }
+  // Task: add pagination to this function
+  async getUsers(){
+    const users = await clerkClient.users.getUserList();
+    if (!users) {
+      throw new Error('Users not found');
+    }
+    return users;
+  }
 }
