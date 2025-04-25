@@ -9,39 +9,37 @@ import { MedicalRecord } from './schemas/medial-record.schema';
 export class RecordService {
 
   constructor(
-    @InjectModel(MedicalRecord.name) private readonly recordModel: Model<MedicalRecord>,
+    @InjectModel(MedicalRecord.name) private readonly MedicalRecordModel: Model<MedicalRecord>,
   ) {}
 
-  async addOrUpdateMedicalRecord(patientId: string, newEntry: RecordEntryDto) {
-    const record = await this.recordModel.findOne({ patientId });
+  async addOrUpdateMedicalRecord(patientId: string, newEntry: RecordEntryDto) : Promise<MedicalRecord> {
+    const medicalRecord = await this.MedicalRecordModel.findOne({ patientId });
   
-    if (record) {
-      record.records.push(newEntry.toRecord());
-      return record.save();
+    //validate
+
+    if (medicalRecord) {
+      medicalRecord.records.push(newEntry.toRecord());
+      return medicalRecord.save();
     } else {
-      const newRecord = new this.recordModel({
+      const newMedicalRecord = new this.MedicalRecordModel({
         patientId,
         records: [newEntry.toRecord()],
       });
-      return newRecord.save();
+      return newMedicalRecord.save();
     }
   }
   
 
-  create(createRecordDto: RecordEntryDto) {
-    return 'This action adds a new record';
+  findAll(): Promise<MedicalRecord[]> {
+    return this.MedicalRecordModel.find().exec();
   }
 
-  findAll() {
-    return `This action returns all record`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} record`;
-  }
-
-  update(id: number, updateRecordDto: RecordEntryDto) {
-    return `This action updates a #${id} record`;
+  async findOne(id: number): Promise<MedicalRecord> {
+    const medicalRecord = await this.MedicalRecordModel.findById(id).exec();
+    if (!medicalRecord) {
+      throw new Error(`Medical record with id ${id} not found`);
+    }
+    return medicalRecord;
   }
 
   remove(id: number) {
