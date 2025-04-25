@@ -11,6 +11,15 @@ export class RecordController {
     return this.recordService.create(createRecordDto);
   }
 
+  @Post(':patientId')
+  createOrUpdateMedicalRecord(
+    @Param('patientId') patientId: string,
+    @Body() newEntry: RecordEntryDto
+  ) {
+    return this.recordService.addOrUpdateMedicalRecord(patientId, newEntry);
+  }
+
+
   @Get()
   findAll() {
     return this.recordService.findAll();

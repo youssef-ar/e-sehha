@@ -6,6 +6,8 @@ import {
     IsObject,
     IsArray
   } from '@nestjs/class-validator';
+
+  import { RecordEntry } from '../schemas/record-entry.schema';
   
   export class RecordEntryDto {
     @IsString()
@@ -13,7 +15,7 @@ import {
     doctorId: string;
   
     @IsDateString()
-    visitDate: string;
+    visitDate: Date;
   
     @IsObject()
     @IsOptional()
@@ -35,5 +37,17 @@ import {
     @IsOptional()
     @IsString({ each: true })
     sharedWithDoctors?: string[];
+
+    toRecord(): RecordEntry {
+        return {
+            doctorId: this.doctorId,
+            visitDate: this.visitDate,
+            diagnosis: this.diagnosis,
+            treatment: this.treatment,
+            labResults: this.labResults,
+            notes: this.notes ? [this.notes] : [],
+            sharedWithDoctors: this.sharedWithDoctors || [],
+        };
+    }
   }
   

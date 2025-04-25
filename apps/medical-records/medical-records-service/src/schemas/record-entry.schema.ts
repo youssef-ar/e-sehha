@@ -9,13 +9,13 @@ export class RecordEntry {
   visitDate: Date;
 
   @Prop({ type: Object })
-  diagnosis: Record<string, any>;
+  diagnosis?: Record<string, any>;
 
   @Prop({ type: Object })
-  treatment: Record<string, any>;
+  treatment?: Record<string, any>;
 
   @Prop({ type: Object })
-  labResults: Record<string, any>;
+  labResults?: Record<string, any>;
 
   @Prop()
   notes: string[];
