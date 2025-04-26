@@ -14,6 +14,6 @@ async function bootstrap() {
   const documentFactory = ()=> SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory())
   app.use(cookieParser());
-  await app.listen(process.env.port ?? 3001);
+  await app.listen(process.env.port ?? 3000);
 }
 bootstrap();
