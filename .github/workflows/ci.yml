@@ -1,0 +1,92 @@
+name: CI Build & Publish Microservices
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      users: ${{ steps.filter.outputs.users }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Detect changed services
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            users:
+              - 'apps/users/**'
+  users:
+    name: Build, Test, Scan & Publish users service
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.users == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+  
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+  
+      - name: Install dependencies (root)
+        run: |
+          npm ci
+  
+      - name: Lint users service
+        working-directory: apps/users
+        run: npm run lint
+  
+      #- name: Test users
+       # working-directory: apps/users
+       # run: npm test
+  
+      - name: Build users service
+        #working-directory: ./
+        run: npm run build users
+  
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  
+      - name: Set up QEMU (for multi-arch)
+        uses: docker/setup-qemu-action@v2
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+  
+      - name: Build Docker image (without push)
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./apps/users/Dockerfile
+          load: true      
+          tags: users:local
+  
+      - name: Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: users:local
+          format: table
+          exit-code: 1        
+          severity: CRITICAL,HIGH
+  
+      - name: Build and push Docker image (users)
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./apps/users/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/users:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/users:${{ github.sha }}
