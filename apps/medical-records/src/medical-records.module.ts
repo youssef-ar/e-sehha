@@ -11,7 +11,7 @@ import { RecordEntry, RecordEntrySchema } from './schemas/record-entry.schema';
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
       { name: RecordEntry.name, schema: RecordEntrySchema },
     ]),
-    MongooseModule.forRoot('mongodb://localhost/medical-records'),
+    MongooseModule.forRoot('mongodb://mongodb:27017/medical-records'),
   ],
   controllers: [RecordController],
   providers: [RecordService],

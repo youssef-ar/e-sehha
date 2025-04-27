@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, Request, Headers } from '@nestjs/common';
 import { RecordService } from './medical-records.service';
 import { RecordEntryDto } from './dto/record-entry.dto';
 
@@ -17,11 +17,11 @@ export class RecordController {
 
   @Get()
   findAll(
-    @Request() req,
+    @Headers('doctorId') doctorId: string,
     @Query('pageSize') pageSize: number = 10,
     @Query('page') page: number = 1,
   ) {
-    return this.recordService.findAll(req.user.id, +page, +pageSize);
+    return this.recordService.findAll(doctorId, +page, +pageSize);
   }
 
   @Get(':patientId')
