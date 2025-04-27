@@ -3,6 +3,7 @@ import { RecordEntryDto } from './dto/record-entry.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
+import { RecordEntry } from './schemas/record-entry.schema';
 
 
 @Injectable()
@@ -54,12 +55,12 @@ export class RecordService {
     //validate
 
     if (medicalRecord) {
-      medicalRecord.records.push(newEntry.toRecord());
+      medicalRecord.records.push(this.toRecord(newEntry));
       return medicalRecord.save();
     } else {
       const newMedicalRecord = new this.medicalRecordModel({
         patientId,
-        records: [newEntry.toRecord()],
+        records: [this.toRecord(newEntry)],
       });
       return newMedicalRecord.save();
     }
@@ -86,5 +87,17 @@ export class RecordService {
   remove(id: number) {
     return `This action removes a #${id} record`;
   }
+
+  toRecord(entry: RecordEntryDto): RecordEntry {
+    return {
+        doctorId: entry.doctorId,
+        visitDate: entry.visitDate,
+        diagnosis: entry.diagnosis,
+        treatment: entry.treatment,
+        labResults: entry.labResults,
+        notes: entry.notes ? [entry.notes] : [],
+        sharedWithDoctors: entry.sharedWithDoctors || [],
+    };
+}
   
 }

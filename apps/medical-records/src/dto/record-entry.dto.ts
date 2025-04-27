@@ -38,16 +38,6 @@ import {
     @IsString({ each: true })
     sharedWithDoctors?: string[];
 
-    toRecord(): RecordEntry {
-        return {
-            doctorId: this.doctorId,
-            visitDate: this.visitDate,
-            diagnosis: this.diagnosis,
-            treatment: this.treatment,
-            labResults: this.labResults,
-            notes: this.notes ? [this.notes] : [],
-            sharedWithDoctors: this.sharedWithDoctors || [],
-        };
-    }
+    
   }
   

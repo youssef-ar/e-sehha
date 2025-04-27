@@ -17,9 +17,9 @@ export class RecordController {
 
   @Get()
   findAll(
-    @Query('page') page: number = 1,
-    @Query('pageSize') pageSize: number = 10,
     @Request() req,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('page') page: number = 1,
   ) {
     return this.recordService.findAll(req.user.id, +page, +pageSize);
   }

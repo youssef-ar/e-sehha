@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { MedicalRecordsModule } from './medical-records.module';
+import { RecordModule } from './medical-records.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(MedicalRecordsModule);
-  await app.listen(process.env.port ?? 3000);
+  const app = await NestFactory.create(RecordModule);
+  await app.listen(process.env.port ?? 3001);
 }
 bootstrap();
