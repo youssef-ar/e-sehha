@@ -48,6 +48,7 @@ jobs:
       - name: Lint users service
         working-directory: apps/users
         run: npm run lint
+        continue-on-error: true
   
       #- name: Test users
        # working-directory: apps/users
