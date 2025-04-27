@@ -17,6 +17,13 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@app/shared-auth": [
+        "libs/shared-auth/src"
+      ],
+      "@app/shared-auth/*": [
+        "libs/shared-auth/src/*"
+      ]
+    }
   }
 }
