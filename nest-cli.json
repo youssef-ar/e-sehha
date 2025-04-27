@@ -10,6 +10,15 @@
   "monorepo": true,
   "root": "apps/users",
   "projects": {
+    "medical-records": {
+      "type": "application",
+      "root": "apps/medical-records",
+      "entryFile": "main",
+      "sourceRoot": "apps/medical-records/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/medical-records/tsconfig.app.json"
+      }
+    },
     "shared-auth": {
       "type": "library",
       "root": "libs/shared-auth",
