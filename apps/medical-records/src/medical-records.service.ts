@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RecordEntryDto } from './dto/record-entry.dto';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,11 +9,47 @@ import { MedicalRecord } from './schemas/medical-record.schema';
 export class RecordService {
 
   constructor(
-    @InjectModel(MedicalRecord.name) private readonly MedicalRecordModel: Model<MedicalRecord>,
+    @InjectModel(MedicalRecord.name) private readonly medicalRecordModel: Model<MedicalRecord>,
   ) {}
 
+  private buildAuthorizedRecordsAggregation(
+    doctorId: string,
+    patientId?: string,
+    skip = 0,
+    limit = 10
+  ) {
+    const matchStage: any = {};
+    if (patientId) {
+      matchStage.patientId = patientId;
+    }
+
+    return [
+      { $match: matchStage },
+      {
+        $project: {
+          patientId: 1,
+          records: {
+            $filter: {
+              input: "$records",
+              as: "record",
+              cond: {
+                $or: [
+                  { $eq: ["$$record.doctorId", doctorId] },
+                  { $in: [doctorId, "$$record.sharedWithDoctors"] }
+                ]
+              }
+            }
+          }
+        }
+      },
+      { $match: { "records.0": { $exists: true } } },
+      { $skip: skip },
+      { $limit: limit },
+    ];
+  }
+
   async addOrUpdateMedicalRecord(patientId: string, newEntry: RecordEntryDto) : Promise<MedicalRecord> {
-    const medicalRecord = await this.MedicalRecordModel.findOne({ patientId });
+    const medicalRecord = await this.medicalRecordModel.findOne({ patientId });
   
     //validate
 
@@ -21,7 +57,7 @@ export class RecordService {
       medicalRecord.records.push(newEntry.toRecord());
       return medicalRecord.save();
     } else {
-      const newMedicalRecord = new this.MedicalRecordModel({
+      const newMedicalRecord = new this.medicalRecordModel({
         patientId,
         records: [newEntry.toRecord()],
       });
@@ -30,16 +66,21 @@ export class RecordService {
   }
   
 
-  findAll(): Promise<MedicalRecord[]> {
-    return this.MedicalRecordModel.find().exec();
+  async findAll(doctorId: string, page = 1, pageSize = 10) {
+    const skip = (page - 1) * pageSize;
+    const aggregation = this.buildAuthorizedRecordsAggregation(doctorId, undefined, skip, pageSize);
+    return this.medicalRecordModel.aggregate(aggregation);
   }
 
-  async findOne(id: number): Promise<MedicalRecord> {
-    const medicalRecord = await this.MedicalRecordModel.findById(id).exec();
-    if (!medicalRecord) {
-      throw new Error(`Medical record with id ${id} not found`);
+  async findOne(patientId: string, doctorId: string) {
+    const aggregation = this.buildAuthorizedRecordsAggregation(doctorId, patientId);
+    const result = await this.medicalRecordModel.aggregate(aggregation);
+
+    if (!result.length) {
+      throw new NotFoundException('Medical record not found or access denied');
     }
-    return medicalRecord;
+
+    return result[0];
   }
 
   remove(id: number) {
