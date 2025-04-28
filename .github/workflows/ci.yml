@@ -28,7 +28,7 @@ jobs:
           filters: |
             users:
               - 'apps/users/**'
-            medical-records
+            medical-records:
               - 'apps/medical-records/**'
   users:
     name: Build, Test, Scan & Publish users service
