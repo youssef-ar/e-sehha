@@ -10,3 +10,27 @@ services:
       - "3002:3000"
     env_file:
       - .env
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb-medical-records
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: medical-records
+      MONGO_URI: mongodb://mongodb:27017/medical-records
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+  medical-records:
+    build:
+      context: .
+      dockerfile: ./apps/medical-records/Dockerfile
+      target: production
+    ports:
+      - "3003:3000"
+    depends_on:
+    - mongodb
+    env_file:
+      - .env
+volumes:
+  mongo_data:
