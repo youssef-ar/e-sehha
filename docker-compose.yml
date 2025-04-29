@@ -32,5 +32,16 @@ services:
     - mongodb
     env_file:
       - .env
+  doctors-db:
+    image: postgres:13
+    env_file:
+      - ./apps/doctors/.env
+    ports:
+      - '5434:5432'  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 volumes:
   mongo_data:
