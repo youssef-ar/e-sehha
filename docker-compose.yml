@@ -1,20 +1,26 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '15672:15672'
+      - '5672:5672'
   users:
     build:
       context: .
       dockerfile: ./apps/users/Dockerfile
       target: production
     ports:
-      - "3002:3000"
+      - '3002:3000'
     env_file:
       - .env
   mongodb:
     image: mongo:6.0
     container_name: mongodb-medical-records
     ports:
-      - "27017:27017"
+      - '27017:27017'
     environment:
       MONGO_INITDB_DATABASE: medical-records
       MONGO_URI: mongodb://mongodb:27017/medical-records
@@ -27,10 +33,52 @@ services:
       dockerfile: ./apps/medical-records/Dockerfile
       target: production
     ports:
-      - "3003:3000"
+      - '3003:3000'
     depends_on:
-    - mongodb
+      - mongodb
     env_file:
       - .env
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+      target: production
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - users
+      - medical-records
+      - appointments
+
+  appointments:
+    build:
+      context: .
+      dockerfile: ./apps/appointments/Dockerfile
+      target: production
+    ports:
+      - '3001:3000'
+    depends_on:
+      - appointments-db
+      - rabbitmq
+    env_file:
+      - .env
+
+  appointments-db:
+    image: postgres:latest
+    container_name: postgres-appointments
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: appointments
+    volumes:
+      - appointments_db_data:/var/lib/postgresql/data
+    restart: always
+
 volumes:
   mongo_data:
+  appointments_db_data:
