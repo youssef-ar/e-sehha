@@ -3,6 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AppointmentsService } from './appointments.service';
 import {
   CreateAppointmentDto,
+  RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
@@ -90,6 +91,26 @@ export class AppointmentsController {
       return result;
     } catch (error) {
       this.logger.error(`Failed to remove appointment ${id}`);
+      throw error;
+    }
+  }
+
+  @MessagePattern(APPOINTMENTS_PATTERNS.RESCHEDULE_APPOINTMENT)
+  async reschedule(
+    @Payload() payload: { id: string; rescheduleDto: RescheduleAppointmentDto },
+  ) {
+    this.logger.debug(
+      `Rescheduling appointment: ${JSON.stringify(payload.rescheduleDto)}`,
+    );
+    try {
+      const result = await this.appointmentsService.reschedule(
+        payload.id,
+        payload.rescheduleDto,
+      );
+      this.logger.debug(`Appointment rescheduled successfully`);
+      return result;
+    } catch (error) {
+      this.logger.error('Failed to reschedule appointment');
       throw error;
     }
   }

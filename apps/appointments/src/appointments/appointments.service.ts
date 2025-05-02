@@ -1,5 +1,6 @@
 import {
   CreateAppointmentDto,
+  RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { Injectable, Logger } from '@nestjs/common';
@@ -111,5 +112,28 @@ export class AppointmentsService {
       this.logger.error(`Failed to remove appointment ${id}`);
       throw new RpcException(`Could not delete appointment with ID: ${id}.`);
     }
+  }
+
+  async reschedule(id: string, rescheduleDto: RescheduleAppointmentDto) {
+    const { newDate } = rescheduleDto;
+
+    this.logger.debug(`Rescheduling appointment ${id} to new date`);
+
+    const appointment = await this.prisma.appointment.findUnique({
+      where: { id },
+    });
+
+    if (!appointment) {
+      throw new RpcException(`Appointment with ID: ${id} not found`);
+    }
+
+    const updatedAppointment = await this.prisma.appointment.update({
+      where: { id },
+      data: { date: newDate },
+    });
+
+    this.logger.debug(`Successfully rescheduled appointment ${id}`);
+
+    return updatedAppointment;
   }
 }

@@ -4,4 +4,5 @@ export const APPOINTMENTS_PATTERNS = {
   FIND_ONE_APPOINTMENT: 'appointments.findOneAppointment',
   UPDATE_APPOINTMENT_STATUS: 'appointments.updateAppointmentStatus',
   REMOVE_APPOINTMENT: 'appointments.removeAppointment',
+  RESCHEDULE_APPOINTMENT: 'appointments.rescheduleAppointment', // New pattern
 };

@@ -13,6 +13,7 @@ import { lastValueFrom } from 'rxjs';
 import {
   Appointment,
   CreateAppointmentDto,
+  RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_SERVICE } from '../constants';
@@ -143,6 +144,27 @@ export class AppointmentsService {
       return removed;
     } catch (error) {
       return this.handleServiceError(error, `remove appointment ${id}`);
+    }
+  }
+
+  async reschedule(
+    id: string,
+    rescheduleDto: RescheduleAppointmentDto,
+  ): Promise<Appointment> {
+    this.logger.debug(`Rescheduling appointment with ID: ${id}`);
+    try {
+      const rescheduled: Appointment = await lastValueFrom(
+        this.appointmentsClient.send(
+          APPOINTMENTS_PATTERNS.RESCHEDULE_APPOINTMENT,
+          { id, rescheduleDto },
+        ),
+      );
+      this.logger.debug(
+        `Successfully rescheduled appointment: ${JSON.stringify(rescheduled)}`,
+      );
+      return rescheduled;
+    } catch (error) {
+      return this.handleServiceError(error, `reschedule appointment ${id}`);
     }
   }
 }

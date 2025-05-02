@@ -17,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateAppointmentDto,
+  RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 
@@ -92,6 +93,25 @@ export class AppointmentsController {
     this.logger.debug(`Deleting appointment with id: ${id}`);
     const result = await this.appointmentsService.remove(id);
     this.logger.debug(`Deleted appointment with id: ${id}`);
+    return result;
+  }
+
+  @Patch(':id/reschedule')
+  @ApiOperation({ summary: 'Reschedule an appointment' })
+  @ApiResponse({
+    status: 200,
+    description: 'Appointment rescheduled successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Appointment not found' })
+  async reschedule(
+    @Param('id') id: string,
+    @Body() rescheduleDto: RescheduleAppointmentDto,
+  ) {
+    this.logger.debug(
+      `Rescheduling appointment ${id}: ${JSON.stringify(rescheduleDto)}`,
+    );
+    const result = await this.appointmentsService.reschedule(id, rescheduleDto);
+    this.logger.debug(`Rescheduled appointment with id: ${id}`);
     return result;
   }
 }
