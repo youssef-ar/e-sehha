@@ -13,7 +13,7 @@ import { lastValueFrom } from 'rxjs';
 import {
   Appointment,
   CreateAppointmentDto,
-  UpdateAppointmentDto,
+  UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_SERVICE } from '../constants';
 
@@ -103,29 +103,31 @@ export class AppointmentsService {
     }
   }
 
-  async update(
+  async updateStatus(
     id: string,
-    updateAppointmentDto: UpdateAppointmentDto,
+    updateAppointmentStatusDto: UpdateAppointmentStatusDto,
   ): Promise<Appointment> {
     this.logger.debug(
-      `Updating appointment ${id} with: ${JSON.stringify(updateAppointmentDto)}`,
+      `Updating appointment status ${id} with: ${JSON.stringify(updateAppointmentStatusDto)}`,
     );
     try {
       const updated: Appointment = await lastValueFrom(
-        this.appointmentsClient.send(APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT, {
-          id,
-          updateAppointmentDto,
-        }),
+        this.appointmentsClient.send(
+          APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT_STATUS,
+          {
+            id,
+            updateAppointmentStatusDto,
+          },
+        ),
       );
       this.logger.debug(
-        `Successfully updated appointment: ${JSON.stringify(updated)}`,
+        `Successfully updated appointment status: ${JSON.stringify(updated)}`,
       );
       return updated;
     } catch (error) {
-      return this.handleServiceError(error, `update appointment ${id}`);
+      return this.handleServiceError(error, `update appointment status ${id}`);
     }
   }
-
   async remove(id: string): Promise<Appointment> {
     this.logger.debug(`Removing appointment with ID: ${id}`);
     try {

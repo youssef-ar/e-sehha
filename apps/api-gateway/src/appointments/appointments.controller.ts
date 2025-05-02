@@ -17,7 +17,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreateAppointmentDto,
-  UpdateAppointmentDto,
+  UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 
 @ApiTags('Appointments')
@@ -62,22 +62,25 @@ export class AppointmentsController {
     return result;
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update appointment' })
-  @ApiResponse({ status: 200, description: 'Appointment updated successfully' })
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update appointment status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Appointment status updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Appointment not found' })
-  async update(
+  async updateStatus(
     @Param('id') id: string,
-    @Body() updateAppointmentDto: UpdateAppointmentDto,
+    @Body() updateAppointmentStatusDto: UpdateAppointmentStatusDto,
   ) {
     this.logger.debug(
-      `Updating appointment ${id}: ${JSON.stringify(updateAppointmentDto)}`,
+      `Updating appointment status ${id}: ${JSON.stringify(updateAppointmentStatusDto)}`,
     );
-    const result = await this.appointmentsService.update(
+    const result = await this.appointmentsService.updateStatus(
       id,
-      updateAppointmentDto,
+      updateAppointmentStatusDto,
     );
-    this.logger.debug(`Updated appointment with id: ${id}`);
+    this.logger.debug(`Updated appointment status with id: ${id}`);
     return result;
   }
 

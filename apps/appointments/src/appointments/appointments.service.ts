@@ -1,6 +1,6 @@
 import {
   CreateAppointmentDto,
-  UpdateAppointmentDto,
+  UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -59,12 +59,14 @@ export class AppointmentsService {
     return appointment;
   }
 
-  async update(id: string, updateAppointmentDto: UpdateAppointmentDto) {
+  async updateStatus(
+    id: string,
+    updateAppointmentStatusDto: UpdateAppointmentStatusDto,
+  ) {
     this.logger.debug(
-      `Updating appointment ${id}: ${JSON.stringify(updateAppointmentDto)}`,
+      `Updating appointment status ${id}: ${JSON.stringify(updateAppointmentStatusDto)}`,
     );
 
-    // Check if appointment exists
     const exists = await this.prisma.appointment.findUnique({
       where: { id },
     });
@@ -74,15 +76,13 @@ export class AppointmentsService {
     }
 
     const updated = await this.prisma.appointment.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: {
-        ...updateAppointmentDto,
+        status: updateAppointmentStatusDto.status,
       },
     });
 
-    this.logger.debug(`Updated appointment with ID: ${id}`);
+    this.logger.debug(`Updated appointment status with ID: ${id}`);
     return updated;
   }
 

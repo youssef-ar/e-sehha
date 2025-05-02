@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AppointmentsService } from './appointments.service';
 import {
   CreateAppointmentDto,
-  UpdateAppointmentDto,
+  UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
 
@@ -55,23 +55,25 @@ export class AppointmentsController {
     }
   }
 
-  @MessagePattern(APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT)
+  @MessagePattern(APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT_STATUS)
   async update(
     @Payload()
     payload: {
       id: string;
-      updateAppointmentDto: UpdateAppointmentDto;
+      updateAppointmentStatusDto: UpdateAppointmentStatusDto;
     },
   ) {
     this.logger.debug(
-      `Updating appointment ${payload.id}: ${JSON.stringify(payload.updateAppointmentDto)}`,
+      `Updating appointment status ${payload.id} with: ${JSON.stringify(payload.updateAppointmentStatusDto)}`,
     );
     try {
-      const result = await this.appointmentsService.update(
+      const result = await this.appointmentsService.updateStatus(
         payload.id,
-        payload.updateAppointmentDto,
+        payload.updateAppointmentStatusDto,
       );
-      this.logger.debug(`Updated appointment with ID: ${payload.id}`);
+      this.logger.debug(
+        `Successfully updated appointment status: ${JSON.stringify(result)}`,
+      );
       return result;
     } catch (error) {
       this.logger.error(`Failed to update appointment ${payload.id}`);
