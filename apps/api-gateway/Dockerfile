@@ -9,7 +9,11 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY . .
 
-RUN npm run build
+WORKDIR /e-sihha/apps/appointments
+
+RUN npx prisma generate
+
+RUN npm run build api-gateway
 
 RUN npm prune --production
 
@@ -25,4 +29,4 @@ ENV NODE_ENV=production
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/apps/api-gateway/main"]

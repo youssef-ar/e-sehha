@@ -48,36 +48,38 @@ services:
       target: production
     ports:
       - '3000:3000'
-    env_file:
-      - .env
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - APPOINTMENTS_QUEUE=${APPOINTMENTS_QUEUE}
     depends_on:
       - rabbitmq
-      - users
-      - medical-records
       - appointments
+      - medical-records
+      - users
 
   appointments:
     build:
       context: .
       dockerfile: ./apps/appointments/Dockerfile
-      target: production
     ports:
       - '3001:3000'
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@appointments-db:5432/${POSTGRES_DB}?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - APPOINTMENTS_QUEUE=${APPOINTMENTS_QUEUE}
+      - PORT=3001
     depends_on:
       - appointments-db
       - rabbitmq
-    env_file:
-      - .env
 
   appointments-db:
     image: postgres:latest
-    container_name: postgres-appointments
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: appointments
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - appointments_db_data:/var/lib/postgresql/data
     restart: always

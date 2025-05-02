@@ -12,7 +12,7 @@ import { APPOINTMENTS_SERVICE } from '../constants';
         transport: Transport.RMQ,
         options: {
           urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-          queue: 'appointments_queue',
+          queue: process.env.APPOINTMENTS_QUEUE || 'appointments_queue',
           queueOptions: {
             durable: true,
           },

@@ -9,7 +9,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
-// import { AuthGuard } from '@app/shared-auth';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -23,7 +22,6 @@ import {
 
 @ApiTags('Appointments')
 @Controller('appointments')
-// @UseGuards(AuthGuard)
 @ApiBearerAuth('access-token')
 export class AppointmentsController {
   private readonly logger = new Logger(AppointmentsController.name);
