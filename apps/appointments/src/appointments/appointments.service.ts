@@ -2,10 +2,12 @@ import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
+  AppointmentFilterCriteria,
 } from '@app/contracts/appointments';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { IAppointmentsRepository } from './appointments.repository.interface';
+import { Appointment } from '@prisma/client';
 
 @Injectable()
 export class AppointmentsService {
@@ -20,8 +22,12 @@ export class AppointmentsService {
     return this.appointmentsRepository.create(createAppointmentDto);
   }
 
-  async findAll() {
-    return this.appointmentsRepository.findAll();
+  async findAll(
+    page: number = 1,
+    pageSize: number = 10,
+    filterCriteria?: AppointmentFilterCriteria,
+  ): Promise<{ appointments: Appointment[]; total: number }> {
+    return this.appointmentsRepository.findAll(page, pageSize, filterCriteria);
   }
 
   async findOne(id: string) {

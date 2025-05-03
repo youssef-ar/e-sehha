@@ -8,6 +8,7 @@ import {
   Patch,
   Logger,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import {
@@ -16,13 +17,17 @@ import {
   ApiTags,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import {
+  AppointmentFilterCriteria,
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
 } from '@app/contracts/appointments';
 import { ResponseUtil } from '../utils/response.util';
+import { AppointmentStatusEnum } from '@app/contracts/appointments/appointment-status.enum';
+import { FindAllAppointmentsQueryDto } from './dto/find-all-appointments.query.dto';
 
 @ApiTags('Appointments')
 @Controller('appointments')
@@ -97,34 +102,99 @@ export class AppointmentsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Retrieve all appointments' })
+  @ApiOperation({
+    summary: 'Retrieve all appointments with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'patientId',
+    required: false,
+    type: String,
+    description: 'Filter by patient ID',
+  })
+  @ApiQuery({
+    name: 'doctorId',
+    required: false,
+    type: String,
+    description: 'Filter by doctor ID',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: AppointmentStatusEnum,
+    description: 'Filter by appointment status',
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: Date,
+    description: 'Filter appointments from this date',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: Date,
+    description: 'Filter appointments up to this date',
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of all appointments.',
+    description: 'List of appointments with pagination metadata.',
     schema: {
       example: {
         status: 'success',
         statusCode: 200,
         message: 'Appointments retrieved successfully',
-        data: [
-          {
-            id: '12345',
-            patientId: '67890',
-            doctorId: '54321',
-            date: '2025-05-10T10:00:00.000Z',
-            status: 'PENDING',
-            createdAt: '2025-05-01T10:00:00.000Z',
-            updatedAt: '2025-05-01T10:00:00.000Z',
-          },
-        ],
+        data: {
+          appointments: [
+            {
+              id: '12345',
+              patientId: '67890',
+              doctorId: '54321',
+              date: '2025-05-10T10:00:00.000Z',
+              status: 'PENDING',
+              createdAt: '2025-05-01T10:00:00.000Z',
+              updatedAt: '2025-05-01T10:00:00.000Z',
+            },
+          ],
+          total: 1,
+        },
       },
     },
   })
-  async findAll() {
-    this.logger.debug('Getting all appointments...');
+  @ApiResponse({ status: 400, description: 'Invalid query parameters.' })
+  async findAll(@Query() query: FindAllAppointmentsQueryDto) {
+    this.logger.debug(
+      `Getting appointments with query: ${JSON.stringify(query)}`,
+    );
+
+    const filterCriteria: AppointmentFilterCriteria = {
+      patientId: query.patientId,
+      doctorId: query.doctorId,
+      status: query.status,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+    };
+
     try {
-      const result = await this.appointmentsService.findAll();
-      this.logger.debug('Retrieved all appointments');
+      const result = await this.appointmentsService.findAll(
+        query.page,
+        query.pageSize,
+        filterCriteria,
+      );
+      this.logger.debug('Retrieved appointments');
       return ResponseUtil.success(
         'Appointments retrieved successfully',
         result,

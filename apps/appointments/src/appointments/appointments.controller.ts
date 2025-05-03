@@ -2,6 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AppointmentsService } from './appointments.service';
 import {
+  AppointmentFilterCriteria,
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
@@ -31,11 +32,25 @@ export class AppointmentsController {
   }
 
   @MessagePattern(APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS)
-  async findAll() {
-    this.logger.debug('Finding all appointments');
+  async findAll(
+    @Payload()
+    payload: {
+      page?: number;
+      pageSize?: number;
+      filterCriteria?: AppointmentFilterCriteria;
+    },
+  ) {
+    this.logger.debug(
+      `Finding all appointments with payload: ${JSON.stringify(payload)}`,
+    );
     try {
-      const result = await this.appointmentsService.findAll();
-      this.logger.debug('Retrieved all appointments');
+      const { page, pageSize, filterCriteria } = payload;
+      const result = await this.appointmentsService.findAll(
+        page,
+        pageSize,
+        filterCriteria,
+      );
+      this.logger.debug('Retrieved appointments');
       return result;
     } catch (error) {
       this.logger.error('Failed to find all appointments');

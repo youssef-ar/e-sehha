@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IAppointmentsRepository } from './appointments.repository.interface';
-import { Appointment } from '@prisma/client';
+import { Appointment, AppointmentStatus, Prisma } from '@prisma/client';
 import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
+  AppointmentFilterCriteria,
 } from '@app/contracts/appointments';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -43,17 +44,64 @@ export class AppointmentsRepository implements IAppointmentsRepository {
     }
   }
 
-  async findAll(): Promise<Appointment[]> {
+  async findAll(
+    page: number,
+    pageSize: number,
+    filterCriteria?: AppointmentFilterCriteria,
+  ): Promise<{ appointments: Appointment[]; total: number }> {
+    const skip = (page - 1) * pageSize;
+    const where: Prisma.AppointmentWhereInput = {};
+
+    if (filterCriteria?.patientId) {
+      where.patientId = filterCriteria.patientId;
+    }
+    if (filterCriteria?.doctorId) {
+      where.doctorId = filterCriteria.doctorId;
+    }
+    if (filterCriteria?.status) {
+      if (
+        Object.values(AppointmentStatus).includes(
+          filterCriteria.status as AppointmentStatus,
+        )
+      ) {
+        where.status = filterCriteria.status as AppointmentStatus;
+      } else {
+        this.logger.warn(`Invalid status filter: ${filterCriteria.status}`);
+      }
+    }
+    if (filterCriteria?.dateFrom || filterCriteria?.dateTo) {
+      where.date = {};
+      if (filterCriteria.dateFrom) {
+        where.date.gte = filterCriteria.dateFrom;
+      }
+      if (filterCriteria.dateTo) {
+        where.date.lte = filterCriteria.dateTo;
+      }
+    }
+
     try {
-      this.logger.debug('Repository: Finding all appointments');
-      const appointments = await this.prisma.appointment.findMany();
       this.logger.debug(
-        `Repository: Found ${appointments.length} appointments`,
+        `Repository: Finding appointments with filter: ${JSON.stringify(where)}, page: ${page}, pageSize: ${pageSize}`,
       );
-      return appointments;
+      const [appointments, total] = await this.prisma.$transaction([
+        this.prisma.appointment.findMany({
+          where,
+          skip,
+          take: pageSize,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        }),
+        this.prisma.appointment.count({ where }),
+      ]);
+
+      this.logger.debug(
+        `Repository: Found ${appointments.length} appointments, total count: ${total}`,
+      );
+      return { appointments, total };
     } catch (error: unknown) {
       this.logger.error(
-        'Repository: Failed to find all appointments',
+        'Repository: Failed to find appointments',
         error instanceof Error ? error.stack : String(error),
       );
       throw new RpcException('Could not retrieve appointments.');
