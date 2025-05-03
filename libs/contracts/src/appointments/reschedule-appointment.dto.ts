@@ -1,8 +1,14 @@
 import { IsNotEmpty } from '@nestjs/class-validator';
 import { Type } from 'class-transformer';
 import { IsFutureDate } from '../validators/is-future-date.validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class RescheduleAppointmentDto {
+  @ApiProperty({
+    description: 'The new date and time for the appointment',
+    example: '2025-06-16T11:00:00.000Z',
+    type: Date,
+  })
   @IsNotEmpty()
   @Type(() => Date)
   @IsFutureDate({ message: 'New appointment date must be in the future.' })
