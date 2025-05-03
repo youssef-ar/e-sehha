@@ -20,6 +20,9 @@ async function bootstrap() {
       queueOptions: {
         durable: true,
       },
+      socketOptions: {
+        timeout: 5000,
+      },
     },
   });
 
@@ -28,4 +31,4 @@ async function bootstrap() {
   await app.listen(port);
 }
 
-bootstrap();
+void bootstrap();

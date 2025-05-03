@@ -28,6 +28,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             queueOptions: {
               durable: true,
             },
+            socketOptions: {
+              timeout: 5000,
+            },
           },
         }),
         inject: [ConfigService],
