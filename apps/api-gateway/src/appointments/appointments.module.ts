@@ -3,20 +3,34 @@ import { AppointmentsService } from './appointments.service';
 import { AppointmentsController } from './appointments.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { APPOINTMENTS_SERVICE } from '../constants';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ConfigModule,
+    ClientsModule.registerAsync([
       {
         name: APPOINTMENTS_SERVICE,
-        transport: Transport.RMQ,
-        options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-          queue: process.env.APPOINTMENTS_QUEUE || 'appointments_queue',
-          queueOptions: {
-            durable: true,
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [
+              configService.get<string>(
+                'RABBITMQ_URL',
+                'amqp://localhost:5672',
+              ),
+            ],
+            queue: configService.get<string>(
+              'APPOINTMENTS_QUEUE',
+              'appointments_queue',
+            ),
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],

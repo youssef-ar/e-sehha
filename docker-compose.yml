@@ -64,7 +64,7 @@ services:
     ports:
       - '3001:3000'
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@appointments-db:5432/${POSTGRES_DB}?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@appointments-db:5432/${APPOINTMENTS_DB}?schema=public
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
       - APPOINTMENTS_QUEUE=${APPOINTMENTS_QUEUE}
       - PORT=3001
