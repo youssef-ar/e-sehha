@@ -3,15 +3,13 @@ import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
-  AppointmentFilterCriteria,
+  FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 
 export interface IAppointmentsRepository {
   create(createAppointmentDto: CreateAppointmentDto): Promise<Appointment>;
   findAll(
-    page: number,
-    pageSize: number,
-    filterCriteria?: AppointmentFilterCriteria,
+    query: FindAllAppointmentsQueryDto,
   ): Promise<{ appointments: Appointment[]; total: number }>;
   findById(id: string): Promise<Appointment | null>;
   updateStatus(

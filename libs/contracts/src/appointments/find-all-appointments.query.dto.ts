@@ -9,7 +9,7 @@ import {
   Min,
   IsUUID,
 } from 'class-validator';
-import { AppointmentStatusEnum } from '@app/contracts/appointments/appointment-status.enum';
+import { AppointmentStatusEnum } from './appointment-status.enum';
 
 export class FindAllAppointmentsQueryDto {
   @ApiPropertyOptional({

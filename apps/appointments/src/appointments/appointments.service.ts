@@ -2,7 +2,7 @@ import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
-  AppointmentFilterCriteria,
+  FindAllAppointmentsQueryDto, // Import from contracts
 } from '@app/contracts/appointments';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -23,11 +23,9 @@ export class AppointmentsService {
   }
 
   async findAll(
-    page: number = 1,
-    pageSize: number = 10,
-    filterCriteria?: AppointmentFilterCriteria,
+    query: FindAllAppointmentsQueryDto,
   ): Promise<{ appointments: Appointment[]; total: number }> {
-    return this.appointmentsRepository.findAll(page, pageSize, filterCriteria);
+    return this.appointmentsRepository.findAll(query);
   }
 
   async findOne(id: string) {

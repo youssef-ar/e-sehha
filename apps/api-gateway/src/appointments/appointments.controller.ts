@@ -17,17 +17,14 @@ import {
   ApiTags,
   ApiParam,
   ApiBody,
-  ApiQuery,
 } from '@nestjs/swagger';
 import {
-  AppointmentFilterCriteria,
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
+  FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { ResponseUtil } from '../utils/response.util';
-import { AppointmentStatusEnum } from '@app/contracts/appointments/appointment-status.enum';
-import { FindAllAppointmentsQueryDto } from './dto/find-all-appointments.query.dto';
 
 @ApiTags('Appointments')
 @Controller('appointments')
@@ -105,50 +102,6 @@ export class AppointmentsController {
   @ApiOperation({
     summary: 'Retrieve all appointments with pagination and filtering',
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for pagination',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    required: false,
-    type: Number,
-    description: 'Number of items per page',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'patientId',
-    required: false,
-    type: String,
-    description: 'Filter by patient ID',
-  })
-  @ApiQuery({
-    name: 'doctorId',
-    required: false,
-    type: String,
-    description: 'Filter by doctor ID',
-  })
-  @ApiQuery({
-    name: 'status',
-    required: false,
-    enum: AppointmentStatusEnum,
-    description: 'Filter by appointment status',
-  })
-  @ApiQuery({
-    name: 'dateFrom',
-    required: false,
-    type: Date,
-    description: 'Filter appointments from this date',
-  })
-  @ApiQuery({
-    name: 'dateTo',
-    required: false,
-    type: Date,
-    description: 'Filter appointments up to this date',
-  })
   @ApiResponse({
     status: 200,
     description: 'List of appointments with pagination metadata.',
@@ -180,20 +133,8 @@ export class AppointmentsController {
       `Getting appointments with query: ${JSON.stringify(query)}`,
     );
 
-    const filterCriteria: AppointmentFilterCriteria = {
-      patientId: query.patientId,
-      doctorId: query.doctorId,
-      status: query.status,
-      dateFrom: query.dateFrom,
-      dateTo: query.dateTo,
-    };
-
     try {
-      const result = await this.appointmentsService.findAll(
-        query.page,
-        query.pageSize,
-        filterCriteria,
-      );
+      const result = await this.appointmentsService.findAll(query);
       this.logger.debug('Retrieved appointments');
       return ResponseUtil.success(
         'Appointments retrieved successfully',

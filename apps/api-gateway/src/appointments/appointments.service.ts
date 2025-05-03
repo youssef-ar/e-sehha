@@ -12,10 +12,10 @@ import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.
 import { lastValueFrom } from 'rxjs';
 import {
   Appointment,
-  AppointmentFilterCriteria,
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
+  FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_SERVICE } from '../constants';
 
@@ -74,19 +74,17 @@ export class AppointmentsService {
   }
 
   async findAll(
-    page: number = 1,
-    pageSize: number = 10,
-    filterCriteria?: AppointmentFilterCriteria,
+    query: FindAllAppointmentsQueryDto,
   ): Promise<{ appointments: Appointment[]; total: number }> {
     this.logger.debug(
-      `Finding all appointments with page: ${page}, pageSize: ${pageSize}, filter: ${JSON.stringify(filterCriteria)}`,
+      `Finding all appointments with query: ${JSON.stringify(query)}`,
     );
     try {
       const result: { appointments: Appointment[]; total: number } =
         await lastValueFrom(
           this.appointmentsClient.send(
             APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS,
-            { page, pageSize, filterCriteria },
+            query,
           ),
         );
       this.logger.debug(

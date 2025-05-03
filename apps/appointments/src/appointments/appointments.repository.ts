@@ -6,7 +6,7 @@ import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
-  AppointmentFilterCriteria,
+  FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
@@ -45,37 +45,42 @@ export class AppointmentsRepository implements IAppointmentsRepository {
   }
 
   async findAll(
-    page: number,
-    pageSize: number,
-    filterCriteria?: AppointmentFilterCriteria,
+    query: FindAllAppointmentsQueryDto,
   ): Promise<{ appointments: Appointment[]; total: number }> {
+    const {
+      page = 1,
+      pageSize = 10,
+      patientId,
+      doctorId,
+      status,
+      dateFrom,
+      dateTo,
+    } = query;
     const skip = (page - 1) * pageSize;
     const where: Prisma.AppointmentWhereInput = {};
 
-    if (filterCriteria?.patientId) {
-      where.patientId = filterCriteria.patientId;
+    if (patientId) {
+      where.patientId = patientId;
     }
-    if (filterCriteria?.doctorId) {
-      where.doctorId = filterCriteria.doctorId;
+    if (doctorId) {
+      where.doctorId = doctorId;
     }
-    if (filterCriteria?.status) {
+    if (status) {
       if (
-        Object.values(AppointmentStatus).includes(
-          filterCriteria.status as AppointmentStatus,
-        )
+        Object.values(AppointmentStatus).includes(status as AppointmentStatus)
       ) {
-        where.status = filterCriteria.status as AppointmentStatus;
+        where.status = status as AppointmentStatus;
       } else {
-        this.logger.warn(`Invalid status filter: ${filterCriteria.status}`);
+        this.logger.warn(`Invalid status filter: ${status}`);
       }
     }
-    if (filterCriteria?.dateFrom || filterCriteria?.dateTo) {
+    if (dateFrom || dateTo) {
       where.date = {};
-      if (filterCriteria.dateFrom) {
-        where.date.gte = filterCriteria.dateFrom;
+      if (dateFrom) {
+        where.date.gte = dateFrom;
       }
-      if (filterCriteria.dateTo) {
-        where.date.lte = filterCriteria.dateTo;
+      if (dateTo) {
+        where.date.lte = dateTo;
       }
     }
 
