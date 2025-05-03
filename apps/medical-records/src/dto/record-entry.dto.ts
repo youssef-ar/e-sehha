@@ -6,8 +6,6 @@ import {
     IsObject,
     IsArray
   } from '@nestjs/class-validator';
-
-  import { RecordEntry } from '../schemas/record-entry.schema';
   
   export class RecordEntryDto {
     @IsString()
@@ -37,7 +35,5 @@ import {
     @IsOptional()
     @IsString({ each: true })
     sharedWithDoctors?: string[];
-
-    
   }
   
