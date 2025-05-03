@@ -1,12 +1,5 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
 import { lastValueFrom } from 'rxjs';
@@ -19,6 +12,7 @@ import {
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_SERVICE } from '../constants';
 import { PaginatedResponseDto } from '@app/contracts/pagination';
+import { handleRpcError } from '../utils/error-handler.util';
 
 @Injectable()
 export class AppointmentsService {
@@ -27,36 +21,6 @@ export class AppointmentsService {
   constructor(
     @Inject(APPOINTMENTS_SERVICE) private appointmentsClient: ClientProxy,
   ) {}
-
-  private handleServiceError(error: any, operation: string): never {
-    this.logger.error(`API Gateway: Failed to ${operation}`, error);
-
-    if (error instanceof RpcException || (error?.message && error?.status)) {
-      const rpcError = error.getError ? error.getError() : error;
-      const message =
-        typeof rpcError === 'string'
-          ? rpcError
-          : rpcError?.message || 'Unknown microservice error';
-      const status = rpcError?.status || rpcError?.statusCode;
-
-      if (message.includes('not found') || status === 404) {
-        throw new NotFoundException(message);
-      } else if (
-        status === 400 ||
-        message.toLowerCase().includes('validation') ||
-        message.toLowerCase().includes('constraint')
-      ) {
-        throw new BadRequestException(message);
-      }
-      throw new InternalServerErrorException(
-        message || `An error occurred during ${operation}`,
-      );
-    }
-
-    throw new InternalServerErrorException(
-      `An unexpected error occurred while ${operation}`,
-    );
-  }
 
   async create(
     createAppointmentDto: CreateAppointmentDto,
@@ -76,7 +40,7 @@ export class AppointmentsService {
       );
       return result;
     } catch (error) {
-      return this.handleServiceError(error, 'create appointment');
+      handleRpcError(error, this.logger, 'create appointment');
     }
   }
 
@@ -98,7 +62,7 @@ export class AppointmentsService {
       );
       return result;
     } catch (error) {
-      this.handleServiceError(error, 'find all appointments');
+      handleRpcError(error, this.logger, 'find all appointments');
     }
   }
 
@@ -114,7 +78,7 @@ export class AppointmentsService {
       this.logger.debug(`Found appointment: ${JSON.stringify(appointment)}`);
       return appointment;
     } catch (error) {
-      return this.handleServiceError(error, `find appointment ${id}`);
+      handleRpcError(error, this.logger, `find appointment ${id}`);
     }
   }
 
@@ -140,7 +104,7 @@ export class AppointmentsService {
       );
       return updated;
     } catch (error) {
-      return this.handleServiceError(error, `update appointment status ${id}`);
+      handleRpcError(error, this.logger, `update appointment status ${id}`);
     }
   }
   async remove(id: string): Promise<Appointment> {
@@ -157,7 +121,7 @@ export class AppointmentsService {
       );
       return removed;
     } catch (error) {
-      return this.handleServiceError(error, `remove appointment ${id}`);
+      handleRpcError(error, this.logger, `remove appointment ${id}`);
     }
   }
 
@@ -178,7 +142,7 @@ export class AppointmentsService {
       );
       return rescheduled;
     } catch (error) {
-      return this.handleServiceError(error, `reschedule appointment ${id}`);
+      handleRpcError(error, this.logger, `reschedule appointment ${id}`);
     }
   }
 }
