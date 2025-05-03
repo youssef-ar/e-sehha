@@ -1,5 +1,6 @@
-import { IsDate, IsNotEmpty, IsString } from '@nestjs/class-validator';
+import { IsNotEmpty, IsString } from '@nestjs/class-validator';
 import { Type } from 'class-transformer';
+import { IsFutureDate } from '../validators/is-future-date.validator';
 
 export class CreateAppointmentDto {
   @IsString()
@@ -11,7 +12,7 @@ export class CreateAppointmentDto {
   doctorId: string;
 
   @IsNotEmpty()
-  @IsDate()
   @Type(() => Date)
+  @IsFutureDate({ message: 'Appointment date must be in the future.' })
   date: Date;
 }
