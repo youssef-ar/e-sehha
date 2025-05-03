@@ -5,12 +5,13 @@ import {
   UpdateAppointmentStatusDto,
   FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
+import { PaginatedResponseDto } from '@app/contracts/pagination';
 
 export interface IAppointmentsRepository {
   create(createAppointmentDto: CreateAppointmentDto): Promise<Appointment>;
   findAll(
     query: FindAllAppointmentsQueryDto,
-  ): Promise<{ appointments: Appointment[]; total: number }>;
+  ): Promise<PaginatedResponseDto<Appointment>>;
   findById(id: string): Promise<Appointment | null>;
   updateStatus(
     id: string,

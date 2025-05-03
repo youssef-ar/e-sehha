@@ -1,41 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Min,
-  IsUUID,
-} from 'class-validator';
+import { IsDate, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { AppointmentStatusEnum } from './appointment-status.enum';
+import { PaginationQueryDto } from '../pagination';
 
-export class FindAllAppointmentsQueryDto {
-  @ApiPropertyOptional({
-    description: 'Page number for pagination',
-    default: 1,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
-  @ApiPropertyOptional({
-    description: 'Number of items per page',
-    default: 10,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  pageSize?: number = 10;
-
+export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({
     description: 'Filter by patient ID',
     type: String,

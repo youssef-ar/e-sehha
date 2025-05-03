@@ -6,7 +6,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
 import { lastValueFrom } from 'rxjs';
@@ -18,6 +18,7 @@ import {
   FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_SERVICE } from '../constants';
+import { PaginatedResponseDto } from '@app/contracts/pagination';
 
 @Injectable()
 export class AppointmentsService {
@@ -27,28 +28,34 @@ export class AppointmentsService {
     @Inject(APPOINTMENTS_SERVICE) private appointmentsClient: ClientProxy,
   ) {}
 
-  // Helper method to handle common error patterns
   private handleServiceError(error: any, operation: string): never {
-    this.logger.error(`Failed to ${operation}`, error);
+    this.logger.error(`API Gateway: Failed to ${operation}`, error);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const errorMessage: string = error?.message || 'Unknown error';
+    if (error instanceof RpcException || (error?.message && error?.status)) {
+      const rpcError = error.getError ? error.getError() : error;
+      const message =
+        typeof rpcError === 'string'
+          ? rpcError
+          : rpcError?.message || 'Unknown microservice error';
+      const status = rpcError?.status || rpcError?.statusCode;
 
-    // Check for common error patterns
-    if (errorMessage.includes('not found')) {
-      console.log('Not found error');
-      throw new NotFoundException(errorMessage);
-    } else if (
-      errorMessage.includes('unique constraint') ||
-      errorMessage.includes('Foreign key constraint') ||
-      errorMessage.includes('validation')
-    ) {
-      throw new BadRequestException(errorMessage);
-    } else {
+      if (message.includes('not found') || status === 404) {
+        throw new NotFoundException(message);
+      } else if (
+        status === 400 ||
+        message.toLowerCase().includes('validation') ||
+        message.toLowerCase().includes('constraint')
+      ) {
+        throw new BadRequestException(message);
+      }
       throw new InternalServerErrorException(
-        `An error occurred while ${operation}`,
+        message || `An error occurred during ${operation}`,
       );
     }
+
+    throw new InternalServerErrorException(
+      `An unexpected error occurred while ${operation}`,
+    );
   }
 
   async create(
@@ -75,24 +82,23 @@ export class AppointmentsService {
 
   async findAll(
     query: FindAllAppointmentsQueryDto,
-  ): Promise<{ appointments: Appointment[]; total: number }> {
+  ): Promise<PaginatedResponseDto<Appointment>> {
     this.logger.debug(
-      `Finding all appointments with query: ${JSON.stringify(query)}`,
+      `API Gateway: Sending findAll appointments request with query: ${JSON.stringify(query)}`,
     );
     try {
-      const result: { appointments: Appointment[]; total: number } =
-        await lastValueFrom(
-          this.appointmentsClient.send(
-            APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS,
-            query,
-          ),
-        );
+      const result: PaginatedResponseDto<Appointment> = await lastValueFrom(
+        this.appointmentsClient.send(
+          APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS,
+          query,
+        ),
+      );
       this.logger.debug(
-        `Found ${result?.appointments?.length} appointments, total: ${result?.total}`,
+        `API Gateway: Found ${result?.data?.length} appointments, total: ${result?.total}`,
       );
       return result;
     } catch (error) {
-      return this.handleServiceError(error, 'find all appointments');
+      this.handleServiceError(error, 'find all appointments');
     }
   }
 

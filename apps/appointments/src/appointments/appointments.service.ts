@@ -2,12 +2,13 @@ import {
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
-  FindAllAppointmentsQueryDto, // Import from contracts
+  FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { IAppointmentsRepository } from './appointments.repository.interface';
 import { Appointment } from '@prisma/client';
+import { PaginatedResponseDto } from '@app/contracts/pagination';
 
 @Injectable()
 export class AppointmentsService {
@@ -24,7 +25,7 @@ export class AppointmentsService {
 
   async findAll(
     query: FindAllAppointmentsQueryDto,
-  ): Promise<{ appointments: Appointment[]; total: number }> {
+  ): Promise<PaginatedResponseDto<Appointment>> {
     return this.appointmentsRepository.findAll(query);
   }
 

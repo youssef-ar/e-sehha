@@ -6,8 +6,10 @@ import {
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
   FindAllAppointmentsQueryDto,
+  Appointment,
 } from '@app/contracts/appointments';
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
+import { PaginatedResponseDto } from '@app/contracts/pagination';
 
 @Controller()
 export class AppointmentsController {
@@ -16,7 +18,9 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @MessagePattern(APPOINTMENTS_PATTERNS.CREATE_APPOINTMENT)
-  async create(@Payload() createAppointmentDto: CreateAppointmentDto) {
+  async create(
+    @Payload() createAppointmentDto: CreateAppointmentDto,
+  ): Promise<Appointment> {
     this.logger.debug(
       `Creating appointment: ${JSON.stringify(createAppointmentDto)}`,
     );
@@ -32,7 +36,9 @@ export class AppointmentsController {
   }
 
   @MessagePattern(APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS)
-  async findAll(@Payload() query: FindAllAppointmentsQueryDto) {
+  async findAll(
+    @Payload() query: FindAllAppointmentsQueryDto,
+  ): Promise<PaginatedResponseDto<Appointment>> {
     this.logger.debug(
       `Finding all appointments with query: ${JSON.stringify(query)}`,
     );
@@ -47,7 +53,7 @@ export class AppointmentsController {
   }
 
   @MessagePattern(APPOINTMENTS_PATTERNS.FIND_ONE_APPOINTMENT)
-  async findOne(@Payload() id: string) {
+  async findOne(@Payload() id: string): Promise<Appointment> {
     this.logger.debug(`Finding appointment with ID: ${id}`);
     try {
       const result = await this.appointmentsService.findOne(id);
@@ -66,7 +72,7 @@ export class AppointmentsController {
       id: string;
       updateAppointmentStatusDto: UpdateAppointmentStatusDto;
     },
-  ) {
+  ): Promise<Appointment> {
     this.logger.debug(
       `Updating appointment status ${payload.id} with: ${JSON.stringify(payload.updateAppointmentStatusDto)}`,
     );
@@ -86,7 +92,7 @@ export class AppointmentsController {
   }
 
   @MessagePattern(APPOINTMENTS_PATTERNS.REMOVE_APPOINTMENT)
-  async remove(@Payload() id: string) {
+  async remove(@Payload() id: string): Promise<Appointment> {
     this.logger.debug(`Removing appointment with ID: ${id}`);
     try {
       const result = await this.appointmentsService.remove(id);
@@ -101,7 +107,7 @@ export class AppointmentsController {
   @MessagePattern(APPOINTMENTS_PATTERNS.RESCHEDULE_APPOINTMENT)
   async reschedule(
     @Payload() payload: { id: string; rescheduleDto: RescheduleAppointmentDto },
-  ) {
+  ): Promise<Appointment> {
     this.logger.debug(
       `Rescheduling appointment: ${JSON.stringify(payload.rescheduleDto)}`,
     );

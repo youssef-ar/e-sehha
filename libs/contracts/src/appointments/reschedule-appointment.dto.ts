@@ -1,7 +1,7 @@
 import { IsNotEmpty } from '@nestjs/class-validator';
 import { Type } from 'class-transformer';
-import { IsFutureDate } from '../validators/is-future-date.validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsFutureDate } from '../validators';
 
 export class RescheduleAppointmentDto {
   @ApiProperty({

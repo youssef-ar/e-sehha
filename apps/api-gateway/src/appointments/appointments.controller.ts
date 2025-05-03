@@ -9,6 +9,7 @@ import {
   Logger,
   HttpStatus,
   Query,
+  Type,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import {
@@ -17,17 +18,47 @@ import {
   ApiTags,
   ApiParam,
   ApiBody,
+  ApiOkResponse,
+  getSchemaPath,
+  ApiExtraModels,
 } from '@nestjs/swagger';
 import {
+  Appointment,
   CreateAppointmentDto,
   RescheduleAppointmentDto,
   UpdateAppointmentStatusDto,
   FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { ResponseUtil } from '../utils/response.util';
+import { PaginatedResponseDto } from '@app/contracts/pagination';
+
+const ApiPaginatedResponse = <DataDto extends Type<unknown>>(
+  dataDto: DataDto,
+) =>
+  ApiOkResponse({
+    schema: {
+      title: `PaginatedResponseOf${dataDto.name}`,
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponseDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(dataDto) },
+            },
+            total: { type: 'number' },
+            page: { type: 'number' },
+            pageSize: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
+        },
+      ],
+    },
+  });
 
 @ApiTags('Appointments')
 @Controller('appointments')
+@ApiExtraModels(PaginatedResponseDto, Appointment)
 export class AppointmentsController {
   private readonly logger = new Logger(AppointmentsController.name);
 
@@ -38,47 +69,10 @@ export class AppointmentsController {
   @ApiResponse({
     status: 201,
     description: 'The appointment has been successfully created.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 201,
-        message: 'Appointment created successfully',
-        data: {
-          id: '12345',
-          patientId: '67890',
-          doctorId: '54321',
-          date: '2025-05-10T10:00:00.000Z',
-          status: 'PENDING',
-          createdAt: '2025-05-01T10:00:00.000Z',
-          updatedAt: '2025-05-01T10:00:00.000Z',
-        },
-      },
-    },
+    type: Appointment,
   })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
-  @ApiBody({
-    description: 'Details of the appointment to be created',
-    type: CreateAppointmentDto,
-    required: true,
-    examples: {
-      example1: {
-        value: {
-          patientId: '67890',
-          doctorId: '54321',
-          date: '2025-05-10T10:00:00.000Z',
-        },
-        description: 'Example of a valid appointment creation request',
-      },
-      example2: {
-        value: {
-          patientId: '67890',
-          doctorId: '54321',
-          date: 'invalid-date-format',
-        },
-        description: 'Example of an invalid appointment creation request',
-      },
-    },
-  })
+  @ApiBody({ type: CreateAppointmentDto })
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     this.logger.debug(
       `Creating appointment: ${JSON.stringify(createAppointmentDto)}...`,
@@ -102,31 +96,7 @@ export class AppointmentsController {
   @ApiOperation({
     summary: 'Retrieve all appointments with pagination and filtering',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of appointments with pagination metadata.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 200,
-        message: 'Appointments retrieved successfully',
-        data: {
-          appointments: [
-            {
-              id: '12345',
-              patientId: '67890',
-              doctorId: '54321',
-              date: '2025-05-10T10:00:00.000Z',
-              status: 'PENDING',
-              createdAt: '2025-05-01T10:00:00.000Z',
-              updatedAt: '2025-05-01T10:00:00.000Z',
-            },
-          ],
-          total: 1,
-        },
-      },
-    },
-  })
+  @ApiPaginatedResponse(Appointment)
   @ApiResponse({ status: 400, description: 'Invalid query parameters.' })
   async findAll(@Query() query: FindAllAppointmentsQueryDto) {
     this.logger.debug(
@@ -151,27 +121,12 @@ export class AppointmentsController {
   @ApiParam({
     name: 'id',
     description: 'The unique identifier of the appointment',
-    example: '12345',
+    type: String,
   })
   @ApiResponse({
     status: 200,
     description: 'The appointment details.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 200,
-        message: 'Appointment retrieved successfully',
-        data: {
-          id: '12345',
-          patientId: '67890',
-          doctorId: '54321',
-          date: '2025-05-10T10:00:00.000Z',
-          status: 'PENDING',
-          createdAt: '2025-05-01T10:00:00.000Z',
-          updatedAt: '2025-05-01T10:00:00.000Z',
-        },
-      },
-    },
+    type: Appointment,
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
   async findOne(@Param('id') id: string) {
@@ -191,46 +146,13 @@ export class AppointmentsController {
   @ApiParam({
     name: 'id',
     description: 'The unique identifier of the appointment',
-    example: '12345',
+    type: String,
   })
-  @ApiBody({
-    description: 'Details of the new appointment status',
-    type: UpdateAppointmentStatusDto,
-    required: true,
-    examples: {
-      example1: {
-        value: {
-          status: 'CONFIRMED',
-        },
-        description: 'Example of a valid appointment status update request',
-      },
-      example2: {
-        value: {
-          status: 'INVALID_STATUS',
-        },
-        description: 'Example of an invalid appointment status update request',
-      },
-    },
-  })
+  @ApiBody({ type: UpdateAppointmentStatusDto })
   @ApiResponse({
     status: 200,
     description: 'The appointment status has been successfully updated.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 200,
-        message: 'Appointment status updated successfully',
-        data: {
-          id: '12345',
-          patientId: '67890',
-          doctorId: '54321',
-          date: '2025-05-10T10:00:00.000Z',
-          status: 'CONFIRMED',
-          createdAt: '2025-05-01T10:00:00.000Z',
-          updatedAt: '2025-05-01T10:00:00.000Z',
-        },
-      },
-    },
+    type: Appointment,
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
   async updateStatus(
@@ -264,19 +186,11 @@ export class AppointmentsController {
   @ApiParam({
     name: 'id',
     description: 'The unique identifier of the appointment',
-    example: '12345',
+    type: String,
   })
   @ApiResponse({
     status: 200,
     description: 'The appointment has been successfully deleted.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 200,
-        message: 'Appointment deleted successfully',
-        data: null,
-      },
-    },
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
   async remove(@Param('id') id: string) {
@@ -284,7 +198,7 @@ export class AppointmentsController {
     try {
       await this.appointmentsService.remove(id);
       this.logger.debug(`Deleted appointment with id: ${id}`);
-      return ResponseUtil.success('Appointment deleted successfully', null);
+      return ResponseUtil.success('Appointment deleted successfully', { id });
     } catch (error) {
       this.logger.error(`Failed to delete appointment with id: ${id}`, error);
       throw error;
@@ -296,46 +210,13 @@ export class AppointmentsController {
   @ApiParam({
     name: 'id',
     description: 'The unique identifier of the appointment',
-    example: '12345',
+    type: String,
   })
-  @ApiBody({
-    description: 'Details of the new appointment date',
-    type: RescheduleAppointmentDto,
-    required: true,
-    examples: {
-      example1: {
-        value: {
-          date: '2035-05-15T10:00:00.000Z',
-        },
-        description: 'Example of a valid appointment reschedule request',
-      },
-      example2: {
-        value: {
-          date: 'invalid-date-format',
-        },
-        description: 'Example of an invalid appointment reschedule request',
-      },
-    },
-  })
+  @ApiBody({ type: RescheduleAppointmentDto })
   @ApiResponse({
     status: 200,
     description: 'The appointment has been successfully rescheduled.',
-    schema: {
-      example: {
-        status: 'success',
-        statusCode: 200,
-        message: 'Appointment rescheduled successfully',
-        data: {
-          id: '12345',
-          patientId: '67890',
-          doctorId: '54321',
-          date: '2025-05-15T10:00:00.000Z',
-          status: 'PENDING',
-          createdAt: '2025-05-01T10:00:00.000Z',
-          updatedAt: '2025-05-01T10:00:00.000Z',
-        },
-      },
-    },
+    type: Appointment,
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
   async reschedule(
