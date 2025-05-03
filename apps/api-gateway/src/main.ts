@@ -24,7 +24,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('E-Sihha API Gateway')
-    .setDescription('API Gateway for E-SIhha microservices')
+    .setDescription('API Gateway for E-Sihha microservices')
     .setVersion('1.0')
     .addBearerAuth(
       {
