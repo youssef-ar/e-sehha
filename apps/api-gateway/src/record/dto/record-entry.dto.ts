@@ -12,7 +12,6 @@ import {
     @IsNotEmpty()
     doctorId: string;
   
-    @IsOptional()
     @IsDateString()
     visitDate: Date;
   

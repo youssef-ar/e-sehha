@@ -55,7 +55,7 @@ services:
       - rabbitmq
       - appointments
       - medical-records
-      - users
+##     - users
 
   appointments:
     build:

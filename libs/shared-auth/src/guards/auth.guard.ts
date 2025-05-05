@@ -11,7 +11,6 @@ import { extractToken } from '../utils/token.util';
 @Injectable()
 export class AuthGuard implements CanActivate {
   private readonly logger = new Logger('AuthGuard');
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request & { user?: any }>();
     const token = extractToken(req);
