@@ -6,10 +6,11 @@ import {
   
 } from '@nestjs/common';
 import { RecordEntryDto } from './dto/record-entry.dto';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
 import { RecordEntry } from './schemas/record-entry.schema';
+import { ResponseUtil } from 'apps/api-gateway/src/utils/response.util';
 
 @Injectable()
 export class RecordService {
@@ -66,21 +67,23 @@ export class RecordService {
       const existing = await this.medicalRecordModel.findOne({ patientId });
 
       if (existing) {
-        newEntry.sharedWithDoctors = newEntry.sharedWithDoctors || [];
-        newEntry.sharedWithDoctors.push(newEntry.doctorId);
-        existing.records.push(this.toRecord(newEntry));
+        const newRecord = this.toRecord(newEntry);
+        existing.records.push(newRecord);
         return await existing.save();
       } else {
+        const newRecord = this.toRecord(newEntry);
         const created = new this.medicalRecordModel({
           patientId,
-          records: [this.toRecord(newEntry)],
+          records: [newRecord],
         });
+        console.log('New medical record created:', created);
         return await created.save();
       }
     } catch (error) {
       console.error('Error saving medical record:', error);
       throw new InternalServerErrorException('Failed to save medical record');
     }
+    
   }
 
   async findAll(doctorId: string, page = 1, pageSize = 10) {
@@ -157,6 +160,7 @@ export class RecordService {
 
   private toRecord(entry: RecordEntryDto): RecordEntry {
     return {
+      _id: new Types.ObjectId(),
       doctorId: entry.doctorId,
       visitDate: new Date(entry.visitDate),
       diagnosis: entry.diagnosis || {},
@@ -164,6 +168,7 @@ export class RecordService {
       labResults: entry.labResults || {},
       notes: entry.notes ? (Array.isArray(entry.notes) ? entry.notes : [entry.notes]) : [],
       sharedWithDoctors: entry.sharedWithDoctors || [],
-    };
+    } as RecordEntry;
   }
+  
 }

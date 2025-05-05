@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class RecordEntry {
   @Prop({ type: Types.ObjectId, auto: true })
-  _id?: Types.ObjectId;
+  _id: Types.ObjectId;
 
   @Prop({ required: true })
   doctorId: string;
