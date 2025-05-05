@@ -10,7 +10,6 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
 import { RecordEntry } from './schemas/record-entry.schema';
-import { ResponseUtil } from 'apps/api-gateway/src/utils/response.util';
 
 @Injectable()
 export class RecordService {
@@ -76,7 +75,6 @@ export class RecordService {
           patientId,
           records: [newRecord],
         });
-        console.log('New medical record created:', created);
         return await created.save();
       }
     } catch (error) {
