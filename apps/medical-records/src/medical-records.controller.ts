@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, Query, Request, Headers, UseGuards } from '@nestjs/common';
 import { RecordService } from './medical-records.service';
 import { RecordEntryDto } from './dto/record-entry.dto';
-import { AuthGuard } from '@app/shared-auth/guards/auth.guard';
+///import { AuthGuard } from '@app/shared-auth/guards/auth.guard';
 
 @Controller('record')
-@UseGuards(AuthGuard)
+///@UseGuards(AuthGuard)
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
@@ -25,6 +25,18 @@ export class RecordController {
   ) {
     return this.recordService.findAll(doctorId, +page, +pageSize);
   }
+
+  @Post(':patientId/:recordId')
+  giveDoctorAuthorizationToAuditRecord(
+    @Headers('doctorId') doctorId: string,
+    @Param('patientId') patientId: string,
+    @Param('recordId') recordId: string,
+    @Body('doctorIdToAdd') doctorIdToAdd: string
+  )
+  {
+    return this.recordService.giveDoctorAuthorizationToAuditRecord(doctorId, patientId, recordId, doctorIdToAdd);
+  }
+
 
   @Get(':patientId')
   findOne(

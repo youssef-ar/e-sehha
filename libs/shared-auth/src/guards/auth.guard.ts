@@ -21,14 +21,14 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await clerkClient.verifyToken(token) as any;
+      const payload = await clerkClient.verifyToken(token, {});
       this.logger.log(`Token payload: ${JSON.stringify(payload)}`);
       const userId = payload.userId || payload.sub;
       if (!userId) {
         this.logger.warn('No userId in token payload');
         return false;
       }
-      const user = await clerkClient.users.getUser(userId);
+      const user = await .getUser(userId);
       if (!user) {
         this.logger.warn(`User not found: ${userId}`);
         return false;

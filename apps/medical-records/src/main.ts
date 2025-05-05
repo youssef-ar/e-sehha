@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { RecordModule } from './medical-records.module';
-import { AllExceptionsFilter } from 'libs/common/filters/http-exception.filter';
+import { AllExceptionsFilter } from 'libs/common/filters/rpc-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from 'libs/common/interceptors/response.interceptor';
 

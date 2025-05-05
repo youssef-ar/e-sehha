@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  
 } from '@nestjs/common';
 import { RecordEntryDto } from './dto/record-entry.dto';
 import { Model } from 'mongoose';
@@ -65,6 +66,8 @@ export class RecordService {
       const existing = await this.medicalRecordModel.findOne({ patientId });
 
       if (existing) {
+        newEntry.sharedWithDoctors = newEntry.sharedWithDoctors || [];
+        newEntry.sharedWithDoctors.push(newEntry.doctorId);
         existing.records.push(this.toRecord(newEntry));
         return await existing.save();
       } else {
@@ -124,6 +127,32 @@ export class RecordService {
     }
 
     return { message: 'Record deleted successfully', patientId };
+  }
+
+  async giveDoctorAuthorizationToAuditRecord(
+    doctorId: string,
+    patientId: string,
+    recordId: string,
+    doctorIdToAdd: string
+  )
+  {
+    if (!doctorId || !recordId || !doctorIdToAdd) {
+      throw new BadRequestException('Doctor ID, Record ID, and Doctor ID to add are required');
+    }
+    const medicalRecord = await this.medicalRecordModel.findOne({ patientId: patientId });
+    if (!medicalRecord) {
+      throw new NotFoundException('Medical record not found');
+    }
+    const record = medicalRecord.records.find((record) => record?._id?.toString() === recordId);
+    if (!record) {
+      throw new NotFoundException('Record not found');
+    }
+    if (record.sharedWithDoctors.includes(doctorIdToAdd)) {
+      throw new BadRequestException('Doctor already has access to this record');
+    }
+    record.sharedWithDoctors.push(doctorIdToAdd);
+    await medicalRecord.save();
+    return { message: 'Doctor authorization updated successfully' };
   }
 
   private toRecord(entry: RecordEntryDto): RecordEntry {
