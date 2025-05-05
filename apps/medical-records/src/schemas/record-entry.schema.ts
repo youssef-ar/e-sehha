@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-@Schema() // _id is true by default
+@Schema()
 export class RecordEntry {
-  @Prop({ type: Types.ObjectId, auto: true }) // Explicitly declare _id if needed
+  @Prop({ type: Types.ObjectId, auto: true })
   _id?: Types.ObjectId;
 
   @Prop({ required: true })
