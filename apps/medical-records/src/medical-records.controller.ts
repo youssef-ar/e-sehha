@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, Request, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, Request, Headers, UseGuards } from '@nestjs/common';
 import { RecordService } from './medical-records.service';
 import { RecordEntryDto } from './dto/record-entry.dto';
+import { AuthGuard } from '@app/shared-auth/guards/auth.guard';
 
 @Controller('record')
+@UseGuards(AuthGuard)
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
@@ -35,6 +37,6 @@ export class RecordController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.recordService.remove(+id);
+    return this.recordService.remove(id);
   }
 }
