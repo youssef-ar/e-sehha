@@ -10,15 +10,6 @@
   "monorepo": true,
   "root": "apps/users",
   "projects": {
-    "doctors": {
-      "type": "application",
-      "root": "apps/doctors",
-      "entryFile": "main",
-      "sourceRoot": "apps/doctors/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/doctors/tsconfig.app.json"
-      }
-    },
     "medical-records": {
       "type": "application",
       "root": "apps/medical-records",
