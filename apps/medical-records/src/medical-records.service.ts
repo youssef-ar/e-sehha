@@ -160,7 +160,6 @@ export class RecordService {
     return {
       _id: new Types.ObjectId(),
       doctorId: entry.doctorId,
-      visitDate: new Date(entry.visitDate),
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},

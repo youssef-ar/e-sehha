@@ -12,10 +12,6 @@ import {
     @IsNotEmpty()
     doctorId: string;
   
-    @IsOptional()
-    @IsDateString()
-    visitDate: Date;
-  
     @IsObject()
     @IsOptional()
     diagnosis?: Record<string, any>;

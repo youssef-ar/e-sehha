@@ -9,9 +9,6 @@ export class RecordEntry {
   @Prop({ required: true })
   doctorId: string;
 
-  @Prop({ required: true })
-  visitDate: Date;
-
   @Prop({ type: Object })
   diagnosis?: Record<string, any>;
 
