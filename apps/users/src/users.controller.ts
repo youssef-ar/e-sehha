@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { AuthGuard } from '@app/shared-auth/guards/auth.guard';
 import { CurrentUser } from '@app/shared-auth';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from '@app/shared-auth/guards/admin.guard';
 @ApiTags('Users')
 @UseGuards(AuthGuard)
 @Controller()
@@ -21,7 +22,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'All users' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  //@UseGuards(AdminGuard)
+  @UseGuards(AdminGuard)
   async getUsers(){
     return this.usersService.getUsers();
   }
