@@ -3,24 +3,25 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { RecordController } from './record.controller';
 import { RecordService } from './record.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
 
 @Module({
   imports: [
     ConfigModule,
     ClientsModule.registerAsync([
       {
-        name: 'RECORD_SERVICE',
+        name: RECORD_SERVICE,
         imports: [ConfigModule],
-        useFactory: (ConfigService: ConfigService) => ({
+        useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
             urls: [
-              ConfigService.get<string>(
+              configService.get<string>(
                 'RABBITMQ_URL',
-                'amqp://localhost:5672',
+                'amqp://rabbitmq:5672',
               ),
             ],
-            queue: ConfigService.get<string>(
+            queue: configService.get<string>(
               'RECORD_QUEUE',
               'record_queue',
             ),

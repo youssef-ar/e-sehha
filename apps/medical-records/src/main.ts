@@ -10,14 +10,19 @@ async function bootstrap() {
   const app = await NestFactory.create(RecordModule);
   const configService = app.get(ConfigService);
 
-  // Attach microservice
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672')],
-      queue: configService.get<string>('MEDICAL_RECORDS_QUEUE', 'medical_records_queue'),
-      queueOptions: { durable: true },
-      socketOptions: { timeout: 5000 },
+      urls: [
+        configService.get<string>('RABBITMQ_URL', 'amqp://rabbitmq:5672'),
+      ],
+      queue: configService.get<string>(
+        'RECORD_QUEUE',
+        'record_queue',
+      ),
+      socketOptions: {
+        timeout: 5000,
+      },
     },
   });
 

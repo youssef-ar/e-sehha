@@ -1,13 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
 import { RecordService } from './medical-records.service';
-import { RecordEntryDto } from './dto/record-entry.dto';
-
+import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
+import { recordPatterns } from '@app/contracts/medical-records/records.patterns';
 @Controller()
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
-  @MessagePattern('record.createOrUpdate')
+  @MessagePattern(recordPatterns.CREATE_UPDATE)
   createOrUpdateMedicalRecord(
     @Payload() data: { patientId: string; newEntry: RecordEntryDto },
     @Ctx() context: RmqContext,
@@ -16,7 +16,7 @@ export class RecordController {
     return this.recordService.addOrUpdateMedicalRecord(patientId, newEntry);
   }
 
-  @MessagePattern('record.findAll')
+  @MessagePattern(recordPatterns.FIND_ALL)
   findAll(
     @Payload() data: { doctorId: string; pageSize?: number; page?: number },
     @Ctx() context: RmqContext,
@@ -25,7 +25,7 @@ export class RecordController {
     return this.recordService.findAll(doctorId, +page, +pageSize);
   }
 
-  @MessagePattern('record.giveAuthorization')
+  @MessagePattern(recordPatterns.GIVE_AUTHORIZATION)
   giveDoctorAuthorizationToAuditRecord(
     @Payload()
     data: {
@@ -45,7 +45,7 @@ export class RecordController {
     );
   }
 
-  @MessagePattern('record.findOne')
+  @MessagePattern(recordPatterns.FIND_ONE)
   findOne(
     @Payload() data: { patientId: string; requesterId: string },
     @Ctx() context: RmqContext,

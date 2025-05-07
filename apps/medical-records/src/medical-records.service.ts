@@ -3,9 +3,10 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  Logger,
   
 } from '@nestjs/common';
-import { RecordEntryDto } from './dto/record-entry.dto';
+import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
@@ -13,6 +14,9 @@ import { RecordEntry } from './schemas/record-entry.schema';
 
 @Injectable()
 export class RecordService {
+
+  private readonly logger = new Logger(RecordService.name);
+  
   constructor(
     @InjectModel(MedicalRecord.name)
     private readonly medicalRecordModel: Model<MedicalRecord>,
@@ -58,6 +62,8 @@ export class RecordService {
     patientId: string,
     newEntry: RecordEntryDto,
   ): Promise<MedicalRecord> {
+    this.logger.debug(`Creating or updating record for patient: ${patientId}`);
+    this.logger.debug(`New entry: ${JSON.stringify(newEntry)}`);
     if (!patientId || !newEntry?.doctorId) {
       throw new BadRequestException('Missing required patient or doctor information');
     }

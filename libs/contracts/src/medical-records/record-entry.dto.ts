@@ -2,7 +2,6 @@ import {
     IsString,
     IsNotEmpty,
     IsOptional,
-    IsDateString,
     IsObject,
     IsArray
   } from '@nestjs/class-validator';

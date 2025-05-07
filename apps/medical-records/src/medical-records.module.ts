@@ -14,7 +14,7 @@ import { ConfigModule } from '@nestjs/config';
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
       { name: RecordEntry.name, schema: RecordEntrySchema },
     ]),
-    MongooseModule.forRoot('mongodb://localhost:27017/medical-records'),
+    MongooseModule.forRoot('mongodb://mongodb:27017/medical-records'),
   ],
   controllers: [RecordController],
   providers: [RecordService],
