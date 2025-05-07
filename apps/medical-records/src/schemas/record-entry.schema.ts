@@ -1,12 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
 
-@Schema({ _id: false })
+@Schema({ timestamps: true })
 export class RecordEntry {
+  @Prop({ type: Types.ObjectId, auto: true })
+  _id: Types.ObjectId;
+
   @Prop({ required: true })
   doctorId: string;
-
-  @Prop({ required: true })
-  visitDate: Date;
 
   @Prop({ type: Object })
   diagnosis?: Record<string, any>;
@@ -21,7 +22,7 @@ export class RecordEntry {
   notes: string[];
 
   @Prop([String])
-  sharedWithDoctors: string[]; // Optional sharing per entry
+  sharedWithDoctors: string[];
 }
 
 export const RecordEntrySchema = SchemaFactory.createForClass(RecordEntry);

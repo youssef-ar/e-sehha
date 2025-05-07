@@ -3,15 +3,20 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  Logger,
+  
 } from '@nestjs/common';
-import { RecordEntryDto } from './dto/record-entry.dto';
-import { Model } from 'mongoose';
+import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
+import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
 import { RecordEntry } from './schemas/record-entry.schema';
 
 @Injectable()
 export class RecordService {
+
+  private readonly logger = new Logger(RecordService.name);
+  
   constructor(
     @InjectModel(MedicalRecord.name)
     private readonly medicalRecordModel: Model<MedicalRecord>,
@@ -57,6 +62,8 @@ export class RecordService {
     patientId: string,
     newEntry: RecordEntryDto,
   ): Promise<MedicalRecord> {
+    this.logger.debug(`Creating or updating record for patient: ${patientId}`);
+    this.logger.debug(`New entry: ${JSON.stringify(newEntry)}`);
     if (!patientId || !newEntry?.doctorId) {
       throw new BadRequestException('Missing required patient or doctor information');
     }
@@ -65,12 +72,14 @@ export class RecordService {
       const existing = await this.medicalRecordModel.findOne({ patientId });
 
       if (existing) {
-        existing.records.push(this.toRecord(newEntry));
+        const newRecord = this.toRecord(newEntry);
+        existing.records.push(newRecord);
         return await existing.save();
       } else {
+        const newRecord = this.toRecord(newEntry);
         const created = new this.medicalRecordModel({
           patientId,
-          records: [this.toRecord(newEntry)],
+          records: [newRecord],
         });
         return await created.save();
       }
@@ -78,6 +87,7 @@ export class RecordService {
       console.error('Error saving medical record:', error);
       throw new InternalServerErrorException('Failed to save medical record');
     }
+    
   }
 
   async findAll(doctorId: string, page = 1, pageSize = 10) {
@@ -126,15 +136,42 @@ export class RecordService {
     return { message: 'Record deleted successfully', patientId };
   }
 
+  async giveDoctorAuthorizationToAuditRecord(
+    doctorId: string,
+    patientId: string,
+    recordId: string,
+    doctorIdToAdd: string
+  )
+  {
+    if (!doctorId || !recordId || !doctorIdToAdd) {
+      throw new BadRequestException('Doctor ID, Record ID, and Doctor ID to add are required');
+    }
+    const medicalRecord = await this.medicalRecordModel.findOne({ patientId: patientId });
+    if (!medicalRecord) {
+      throw new NotFoundException('Medical record not found');
+    }
+    const record = medicalRecord.records.find((record) => record?._id?.toString() === recordId);
+    if (!record) {
+      throw new NotFoundException('Record not found');
+    }
+    if (record.sharedWithDoctors.includes(doctorIdToAdd)) {
+      throw new BadRequestException('Doctor already has access to this record');
+    }
+    record.sharedWithDoctors.push(doctorIdToAdd);
+    await medicalRecord.save();
+    return { message: 'Doctor authorization updated successfully' };
+  }
+
   private toRecord(entry: RecordEntryDto): RecordEntry {
     return {
+      _id: new Types.ObjectId(),
       doctorId: entry.doctorId,
-      visitDate: new Date(entry.visitDate),
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},
       notes: entry.notes ? (Array.isArray(entry.notes) ? entry.notes : [entry.notes]) : [],
       sharedWithDoctors: entry.sharedWithDoctors || [],
-    };
+    } as RecordEntry;
   }
+  
 }

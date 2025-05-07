@@ -1,0 +1,133 @@
+import { Controller, Post, Get, Body, Param, Query, Headers, Logger, HttpStatus, Patch, Delete } from '@nestjs/common';
+import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { RecordService } from './record.service';
+import { ResponseUtil } from '../utils/response.util';
+
+@Controller('record')
+@ApiTags('Record')
+export class RecordController {
+  private readonly logger = new Logger(RecordController.name);
+
+  constructor(private readonly recordService: RecordService) {}
+
+  @Post(':patientId')
+  @ApiOperation({ summary: 'Create or update a medical record entry' })
+  @ApiResponse({
+    status: 201,
+    description: 'Medical record entry created or updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  @ApiBody({type: RecordEntryDto})
+  async createOrUpdate(@Param('patientId') patientId: string, @Body() dto: RecordEntryDto) {
+    this.logger.log(`Creating or updating record for patient: ${patientId}`);
+    try {
+      const result = await this.recordService.addOrUpdateMedicalRecord(patientId, dto);
+      this.logger.log('Record creation/update request processed successfully');
+      return ResponseUtil.success('Record created/updated successfully', result, HttpStatus.CREATED);
+    } catch (error) {
+      this.logger.error('Failed to create/update record', error);
+      return ResponseUtil.error('Failed to create/update record', error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Find all medical records for a doctor' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of medical records',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  async findAll(
+    @Headers('doctorId') doctorId: string,
+    @Query('pageSize') pageSize: number = 10,
+    @Query('page') page: number = 1,
+  ) {
+    this.logger.debug(`Finding all records for doctor: ${doctorId}, page: ${page}, pageSize: ${pageSize}`);
+    try {
+      const result = await this.recordService.findAll(doctorId, page, pageSize);
+      this.logger.debug('Record retrieval request processed successfully');
+      return ResponseUtil.success('Records retrieved successfully', result, HttpStatus.OK);
+    } catch (error) {
+      this.logger.error('Failed to retrieve records', error);
+      return ResponseUtil.error('Failed to retrieve records', error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Patch(':patientId/:recordId')
+  @ApiOperation({ summary: 'Authorize a doctor to audit a medical record' })
+  @ApiResponse({
+    status: 200,
+    description: 'Doctor authorized to audit the medical record',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  authorizeAudit(
+    @Headers('doctorId') doctorId: string,
+    @Param('patientId') patientId: string,
+    @Param('recordId') recordId: string,
+    @Body('doctorIdToAdd') doctorIdToAdd: string,
+  ) {
+      this.logger.debug(`Authorizing doctor ${doctorIdToAdd} to audit record ${recordId} for patient ${patientId}`);
+      try{
+        const result = this.recordService.giveDoctorAuthorizationToAuditRecord(
+          doctorId,
+          patientId,
+          recordId,
+          doctorIdToAdd,
+        );
+        this.logger.debug('Authorization request processed successfully');
+        return ResponseUtil.success('Doctor authorized successfully', result, HttpStatus.OK);
+      } catch (error) {
+        this.logger.error('Failed to authorize doctor', error);
+        return ResponseUtil.error('Failed to authorize doctor', error, HttpStatus.BAD_REQUEST);
+      }
+  }
+
+  @Get(':patientId')
+  @ApiOperation({ summary: 'Find a specific medical record for a patient' })
+  @ApiResponse({
+    status: 200,
+    description: 'Medical record found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Medical record not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  async findOne(@Param('patientId') patientId: string, @Headers('userId') requesterId: string) {
+    this.logger.debug(`Finding record for patient: ${patientId}, requester: ${requesterId}`);
+    try {
+      const result = await this.recordService.findOne(patientId, requesterId);
+      this.logger.debug('Record retrieval request processed successfully');
+      return ResponseUtil.success('Record retrieved successfully', result, HttpStatus.OK);
+    } catch (error) {
+      this.logger.error('Failed to retrieve record', error);
+      return ResponseUtil.error('Failed to retrieve record', error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    this.logger.debug(`Removing record with ID: ${id}`);
+    try {
+      const result = this.recordService.remove(id);
+      this.logger.debug('Record removal request processed successfully');
+      return ResponseUtil.success('Record removed successfully', result, HttpStatus.OK);
+    } catch (error) {
+      this.logger.error('Failed to remove record', error);
+      return ResponseUtil.error('Failed to remove record', error, HttpStatus.BAD_REQUEST);
+    }
+  }
+}

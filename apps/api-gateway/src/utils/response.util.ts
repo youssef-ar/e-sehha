@@ -20,7 +20,7 @@ export class ResponseUtil {
   /**
    * Format an error response
    */
-  static error(message: string, statusCode: HttpStatus) {
+  static error(message: string, statusCode: HttpStatus, BAD_REQUEST: HttpStatus) {
     return {
       status: 'error',
       statusCode,
