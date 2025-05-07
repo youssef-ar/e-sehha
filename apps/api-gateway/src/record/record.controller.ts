@@ -30,7 +30,7 @@ export class RecordController {
       return ResponseUtil.success('Record created/updated successfully', result, HttpStatus.CREATED);
     } catch (error) {
       this.logger.error('Failed to create/update record', error);
-      return ResponseUtil.error('Failed to create/update record', error, HttpStatus.BAD_REQUEST);
+      throw error;
     }
   }
 
@@ -57,11 +57,40 @@ export class RecordController {
       return ResponseUtil.success('Records retrieved successfully', result, HttpStatus.OK);
     } catch (error) {
       this.logger.error('Failed to retrieve records', error);
-      return ResponseUtil.error('Failed to retrieve records', error, HttpStatus.BAD_REQUEST);
+      throw error;
     }
   }
 
   @Patch(':patientId/:recordId')
+  @ApiOperation({ summary: 'Update a record entry' })
+  @ApiResponse({
+    status: 200,
+    description: 'Record entry updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  @ApiBody({type: RecordEntryDto})
+  async updateRecordEntry(
+    @Param('patientId') patientId: string,
+    @Param('recordId') recordId: string,
+    @Body() dto: RecordEntryDto,
+  )
+  {
+    this.logger.debug(`Updating record entry for patient: ${patientId}, recordId: ${recordId}`);
+    try {
+      const result = await this.recordService.updateRecordEntry(patientId, recordId, dto);
+      this.logger.debug('Record entry update request processed successfully');
+      return ResponseUtil.success('Record entry updated successfully', result, HttpStatus.OK);
+    } catch (error) {
+      this.logger.error('Failed to update record entry', error);
+      throw error;
+    }
+  }
+
+
+  @Patch(':patientId/:recordId/authorize')
   @ApiOperation({ summary: 'Authorize a doctor to audit a medical record' })
   @ApiResponse({
     status: 200,
@@ -89,7 +118,7 @@ export class RecordController {
         return ResponseUtil.success('Doctor authorized successfully', result, HttpStatus.OK);
       } catch (error) {
         this.logger.error('Failed to authorize doctor', error);
-        return ResponseUtil.error('Failed to authorize doctor', error, HttpStatus.BAD_REQUEST);
+        throw error;
       }
   }
 
@@ -115,7 +144,7 @@ export class RecordController {
       return ResponseUtil.success('Record retrieved successfully', result, HttpStatus.OK);
     } catch (error) {
       this.logger.error('Failed to retrieve record', error);
-      return ResponseUtil.error('Failed to retrieve record', error, HttpStatus.BAD_REQUEST);
+      throw error;
     }
   }
 
@@ -128,7 +157,7 @@ export class RecordController {
       return ResponseUtil.success('Record removed successfully', result, HttpStatus.OK);
     } catch (error) {
       this.logger.error('Failed to remove record', error);
-      return ResponseUtil.error('Failed to remove record', error, HttpStatus.BAD_REQUEST);
+      throw error;
     }
   }
 }

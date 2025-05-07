@@ -1,8 +1,5 @@
 import {
   Injectable,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
   Logger,
   
 } from '@nestjs/common';
@@ -11,6 +8,7 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
 import { RecordEntry } from './schemas/record-entry.schema';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class RecordService {
@@ -65,7 +63,7 @@ export class RecordService {
     this.logger.debug(`Creating or updating record for patient: ${patientId}`);
     this.logger.debug(`New entry: ${JSON.stringify(newEntry)}`);
     if (!patientId || !newEntry?.doctorId) {
-      throw new BadRequestException('Missing required patient or doctor information');
+      throw new RpcException('Missing required patient or doctor information');
     }
 
     try {
@@ -85,13 +83,13 @@ export class RecordService {
       }
     } catch (error) {
       console.error('Error saving medical record:', error);
-      throw new InternalServerErrorException('Failed to save medical record');
+      throw new RpcException('Failed to save medical record');
     }
     
   }
 
   async findAll(doctorId: string, page = 1, pageSize = 10) {
-    if (!doctorId) throw new BadRequestException('Doctor ID is required');
+    if (!doctorId) throw new RpcException('Doctor ID is required');
 
     const skip = (page - 1) * pageSize;
     const pipeline = this.buildAuthorizedRecordsAggregation(
@@ -106,7 +104,7 @@ export class RecordService {
 
   async findOne(patientId: string, doctorId: string) {
     if (!doctorId || !patientId) {
-      throw new BadRequestException('Patient ID and Doctor ID are required');
+      throw new RpcException('Patient ID and Doctor ID are required');
     }
 
     const pipeline = this.buildAuthorizedRecordsAggregation(
@@ -116,7 +114,7 @@ export class RecordService {
     const result = await this.medicalRecordModel.aggregate(pipeline);
 
     if (!result.length) {
-      throw new NotFoundException(
+      throw new RpcException(
         'Medical record not found or access denied',
       );
     }
@@ -124,13 +122,40 @@ export class RecordService {
     return result[0];
   }
 
+  async updateRecord(
+    patientId: string,
+    recordId: string,
+    newEntry: RecordEntryDto,
+  ) {
+    if (!patientId || !recordId) {
+      throw new RpcException('Patient ID and Record ID are required');
+    }
+
+    const medicalRecord = await this.medicalRecordModel.findOne({ patientId });
+    if (!medicalRecord) {
+      throw new RpcException('Medical record not found');
+    }
+
+    const record = medicalRecord.records.find(
+      (record) => record._id.toString() === recordId,
+    );
+    if (!record) {
+      throw new RpcException('Record not found');
+    }
+
+    Object.assign(record, newEntry);
+    await medicalRecord.save();
+
+    return { message: 'Record updated successfully' };
+  }
+
   async remove(patientId: string) {
-    if (!patientId) throw new BadRequestException('Patient ID is required');
+    if (!patientId) throw new RpcException('Patient ID is required');
 
     const deleted = await this.medicalRecordModel.findOneAndDelete({ patientId });
 
     if (!deleted) {
-      throw new NotFoundException('Medical record not found');
+      throw new RpcException('Medical record not found');
     }
 
     return { message: 'Record deleted successfully', patientId };
@@ -144,18 +169,21 @@ export class RecordService {
   )
   {
     if (!doctorId || !recordId || !doctorIdToAdd) {
-      throw new BadRequestException('Doctor ID, Record ID, and Doctor ID to add are required');
+      throw new RpcException('Doctor ID, Record ID, and Doctor ID to add are required');
     }
     const medicalRecord = await this.medicalRecordModel.findOne({ patientId: patientId });
     if (!medicalRecord) {
-      throw new NotFoundException('Medical record not found');
+      this.logger.error(`Medical record not found for patient: ${patientId}`);
+      throw new RpcException('Medical record not found');
     }
     const record = medicalRecord.records.find((record) => record?._id?.toString() === recordId);
     if (!record) {
-      throw new NotFoundException('Record not found');
+      this.logger.error(`Record not found for ID: ${recordId}`);
+      throw new RpcException('Record not found');
     }
     if (record.sharedWithDoctors.includes(doctorIdToAdd)) {
-      throw new BadRequestException('Doctor already has access to this record');
+      this.logger.error(`Doctor ${doctorIdToAdd} already has access to this record`);
+      throw new RpcException('Doctor already has access to this record');
     }
     record.sharedWithDoctors.push(doctorIdToAdd);
     await medicalRecord.save();

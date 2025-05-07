@@ -4,4 +4,5 @@ export const recordPatterns = {
     GIVE_AUTHORIZATION: 'record.giveAuthorization',
     FIND_ONE: 'record.findOne',
     REMOVE: 'record.remove',
+    UPDATE_RECORD: 'record.updateRecord',
 }

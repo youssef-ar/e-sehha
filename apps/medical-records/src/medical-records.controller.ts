@@ -25,6 +25,15 @@ export class RecordController {
     return this.recordService.findAll(doctorId, +page, +pageSize);
   }
 
+  @MessagePattern(recordPatterns.UPDATE_RECORD)
+  updateRecord(
+    @Payload() data: { patientId: string; recordId: string; newEntry: RecordEntryDto },
+    @Ctx() context: RmqContext,
+  ) {
+    const { patientId, recordId, newEntry } = data;
+    return this.recordService.updateRecord(patientId, recordId, newEntry);
+  }
+
   @MessagePattern(recordPatterns.GIVE_AUTHORIZATION)
   giveDoctorAuthorizationToAuditRecord(
     @Payload()

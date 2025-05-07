@@ -10,7 +10,7 @@ export class RecordService {
     private readonly logger = new Logger(RecordService.name);
 
     constructor(
-        @Inject(RECORD_SERVICE) private recordClient: ClientProxy,
+        @Inject(RECORD_SERVICE) private readonly recordClient: ClientProxy,
     ) {}
 
     async addOrUpdateMedicalRecord(
@@ -68,6 +68,25 @@ export class RecordService {
         }
     }
 
+    async updateRecordEntry(
+        patientId: string,
+        recordId: string,
+        newEntry: RecordEntryDto
+    )
+    {
+        this.logger.debug(`Updating record entry for patient: ${patientId}, recordId: ${recordId}`);
+        try {
+            const result = await lastValueFrom(
+                this.recordClient.send(recordPatterns.UPDATE_RECORD, { patientId, recordId, newEntry })
+            );
+            this.logger.debug('Record entry update request processed successfully');
+            return result;
+        } catch (error) {
+            this.logger.error('Failed to update record entry', error);
+            handleRpcError(error, this.logger, 'update medical record entry');
+        }
+    }
+
     async giveDoctorAuthorizationToAuditRecord(
         doctorId: string,
         patientId: string,
@@ -102,7 +121,4 @@ export class RecordService {
             handleRpcError(error, this.logger, 'remove medical record');
         }
     }
-
-    
-
 }
