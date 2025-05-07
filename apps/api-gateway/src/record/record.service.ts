@@ -33,8 +33,8 @@ export class RecordService {
 
     async findAll(
         doctorId: string,
-        pageSize: number = 10,
-        page: number = 1
+        page: number = 1,
+        pageSize: number = 10
     )
     {
         this.logger.debug(`Finding all records for doctor: ${doctorId}, page: ${page}, pageSize: ${pageSize}`);

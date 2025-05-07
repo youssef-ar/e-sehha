@@ -44,6 +44,7 @@ export class RecordController {
     status: 400,
     description: 'Bad Request',
   })
+  @ApiBody({type: RecordEntryDto})
   async findAll(
     @Headers('doctorId') doctorId: string,
     @Query('pageSize') pageSize: number = 10,

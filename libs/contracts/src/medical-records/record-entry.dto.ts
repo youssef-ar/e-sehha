@@ -23,9 +23,9 @@ import {
     @IsOptional()
     labResults?: Record<string, any>;
   
-    @IsString()
+    @IsObject()
     @IsOptional()
-    notes?: string;
+    notes?: Record<string, any>;
   
     @IsArray()
     @IsOptional()
