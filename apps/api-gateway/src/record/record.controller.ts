@@ -100,7 +100,7 @@ export class RecordController {
     status: 400,
     description: 'Bad Request',
   })
-  authorizeAudit(
+  async authorizeAudit(
     @Headers('doctorId') doctorId: string,
     @Param('patientId') patientId: string,
     @Param('recordId') recordId: string,
@@ -108,7 +108,7 @@ export class RecordController {
   ) {
       this.logger.debug(`Authorizing doctor ${doctorIdToAdd} to audit record ${recordId} for patient ${patientId}`);
       try{
-        const result = this.recordService.giveDoctorAuthorizationToAuditRecord(
+        const result = await this.recordService.giveDoctorAuthorizationToAuditRecord(
           doctorId,
           patientId,
           recordId,
@@ -149,10 +149,10 @@ export class RecordController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     this.logger.debug(`Removing record with ID: ${id}`);
     try {
-      const result = this.recordService.remove(id);
+      const result = await this.recordService.remove(id);
       this.logger.debug('Record removal request processed successfully');
       return ResponseUtil.success('Record removed successfully', result, HttpStatus.OK);
     } catch (error) {
