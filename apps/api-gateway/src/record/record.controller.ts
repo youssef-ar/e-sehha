@@ -1,9 +1,12 @@
-import { Controller, Post, Get, Body, Param, Query, Headers, Logger, HttpStatus, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, Headers, Logger, HttpStatus, Patch, Delete, UseGuards } from '@nestjs/common';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RecordService } from './record.service';
 import { ResponseUtil } from '../utils/response.util';
+import { AuthGuard, CurrentUser } from '@app/shared-auth';
 
+
+@UseGuards(AuthGuard)
 @Controller('record')
 @ApiTags('Record')
 export class RecordController {
@@ -46,7 +49,7 @@ export class RecordController {
   })
   @ApiBody({type: RecordEntryDto})
   async findAll(
-    @Headers('doctorId') doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Query('pageSize') pageSize: number = 10,
     @Query('page') page: number = 1,
   ) {
@@ -101,7 +104,7 @@ export class RecordController {
     description: 'Bad Request',
   })
   async authorizeAudit(
-    @Headers('doctorId') doctorId: string,
+    @CurrentUser('id') doctorId: string,
     @Param('patientId') patientId: string,
     @Param('recordId') recordId: string,
     @Body('doctorIdToAdd') doctorIdToAdd: string,
@@ -136,7 +139,7 @@ export class RecordController {
     status: 400,
     description: 'Bad Request',
   })
-  async findOne(@Param('patientId') patientId: string, @Headers('userId') requesterId: string) {
+  async findOne(@Param('patientId') patientId: string, @CurrentUser('id') requesterId: string) {
     this.logger.debug(`Finding record for patient: ${patientId}, requester: ${requesterId}`);
     try {
       const result = await this.recordService.findOne(patientId, requesterId);
