@@ -12,7 +12,7 @@ export class SymptomCheckerService {
     async checkSymptoms(symptoms: string) {
         this.logger.debug(`Checking symptoms: ${symptoms}`);
         try {
-            const result = await this.symptomCheckerClient.send('check_symptoms', { symptoms }).toPromise();
+            const result = await this.symptomCheckerClient.send('symptom-checker.get-ai-response', { symptoms }).toPromise();
             this.logger.debug('Symptom check request processed successfully');
             return result;
         } catch (error) {

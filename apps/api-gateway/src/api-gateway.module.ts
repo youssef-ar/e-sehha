@@ -6,7 +6,6 @@ import { RateLimiterModule, RateLimiterGuard } from 'nestjs-rate-limiter';
 import { APP_GUARD } from '@nestjs/core';
 import { RecordModule } from './record/record.module';
 import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
-import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { UsersService } from './users/users.service';
       provide: APP_GUARD,
       useClass: RateLimiterGuard,
     },
-    UsersService,
   ],
 })
 export class ApiGatewayModule {}

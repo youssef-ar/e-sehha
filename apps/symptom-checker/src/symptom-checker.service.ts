@@ -12,7 +12,7 @@ export class SymptomCheckerService {
   }
 
   async getSpeciality(symptom: string): Promise<string> {
-    const model = this.gemini.getGenerativeModel({ model: 'gemini-pro' });
+    const model = this.gemini.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `You are a medical assistant. Your job is to map symptoms to the most relevant doctor speciality. Respond concisely with only the name of the specialty and the severity of the symptoms. A patient is experiencing: "${symptom}". 
     Based on these symptoms, which medical specialist should they consult?`;

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SymptomCheckerController } from './symptom-checker.controller';
 import { SymptomCheckerService } from './symptom-checker.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
@@ -11,19 +11,19 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             {
                 name: 'SYMPTOM_CHECKER_SERVICE',
                 imports: [ConfigModule],
-                useFactory: (configService) => ({
+                useFactory: (configService: ConfigService) => ({
                     transport: Transport.RMQ,
                     options: {
                         urls: [
-                            configService.get(
+                            configService.get<string>(
                                 'RABBITMQ_URL',
                                 'amqp://rabbitmq:5672',
-                            ) as string,
+                            ),
                         ],
-                        queue: configService.get(
+                        queue: configService.get<string>(
                             'SYMPTOM_CHECKER_QUEUE',
                             'symptom_checker_queue',
-                        ) as string,
+                        ),
                         queueOptions: {
                             durable: true,
                         },
@@ -32,6 +32,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
                         },
                     },
                 }),
+                inject: [ConfigService],
             }
         ])
     ],
