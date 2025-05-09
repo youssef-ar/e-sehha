@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Logger } from '@nestjs/common';
 import { SymptomCheckerService } from './symptom-checker.service';
 import { ApiResponse } from '@nestjs/swagger';
+import { SymptomCheckerDto } from '@app/contracts/symptom-checker/symptoms.dto';
 
 @Controller('symptom-checker')
 export class SymptomCheckerController {
@@ -17,9 +18,10 @@ export class SymptomCheckerController {
         status: 400,
         description: 'Bad Request',
     })
-    async checkSymptoms(@Body() symptoms: string) {
+    async checkSymptoms(@Body() symptoms: SymptomCheckerDto) {
         this.logger.debug('Checking symptoms...');
         try {
+            this.logger.debug('Received symptoms:', symptoms);
             const result = await this.symptomCheckerService.checkSymptoms(symptoms);
             this.logger.debug('Symptom check request processed successfully');
             return result;

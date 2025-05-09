@@ -1,3 +1,5 @@
+import { SYMPTOM_CHECKER_PATTERNS } from '@app/contracts/symptom-checker/symptom-checker.patterns';
+import { SymptomCheckerDto } from '@app/contracts/symptom-checker/symptoms.dto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -9,10 +11,10 @@ export class SymptomCheckerService {
         @Inject('SYMPTOM_CHECKER_SERVICE') private readonly symptomCheckerClient: ClientProxy,
     ) {}
 
-    async checkSymptoms(symptoms: string) {
-        this.logger.debug(`Checking symptoms: ${symptoms}`);
+    async checkSymptoms(symptoms: SymptomCheckerDto) {
+        this.logger.debug(`Checking symptoms: ${JSON.stringify(symptoms)}`);
         try {
-            const result = await this.symptomCheckerClient.send('symptom-checker.get-ai-response', { symptoms }).toPromise();
+            const result = await this.symptomCheckerClient.send(SYMPTOM_CHECKER_PATTERNS.SYMPTOM_CHECKER,  symptoms ).toPromise();
             this.logger.debug('Symptom check request processed successfully');
             return result;
         } catch (error) {
