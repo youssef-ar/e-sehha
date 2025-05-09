@@ -55,6 +55,15 @@
         "tsConfigPath": "libs/shared-auth/tsconfig.lib.json"
       }
     },
+    "symptom-checker": {
+      "type": "application",
+      "root": "apps/symptom-checker",
+      "entryFile": "main",
+      "sourceRoot": "apps/symptom-checker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/symptom-checker/tsconfig.app.json"
+      }
+    },
     "users": {
       "type": "application",
       "root": "apps/users",
