@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './config/env.validation';
 import { RateLimiterModule, RateLimiterGuard } from 'nestjs-rate-limiter';
 import { APP_GUARD } from '@nestjs/core';
+import { DoctorModule } from './doctor/doctor.module';
 import { RecordModule } from './record/record.module';
 import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
 
@@ -22,6 +23,7 @@ import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
       duration: 60,
     }),
     AppointmentsModule,
+    DoctorModule,
     RecordModule,
     SymptomCheckerModule
   ],

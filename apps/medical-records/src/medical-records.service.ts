@@ -64,6 +64,7 @@ export class RecordService {
     this.logger.debug(`New entry: ${JSON.stringify(newEntry)}`);
     if (!patientId || !newEntry?.doctorId) {
       throw new RpcException('Missing required patient or doctor information');
+
     }
 
     try {
@@ -114,9 +115,11 @@ export class RecordService {
     const result = await this.medicalRecordModel.aggregate(pipeline);
 
     if (!result.length) {
+
       throw new RpcException(
         'Medical record not found or access denied',
       );
+
     }
 
     return result[0];
@@ -152,7 +155,9 @@ export class RecordService {
   async remove(patientId: string) {
     if (!patientId) throw new RpcException('Patient ID is required');
 
-    const deleted = await this.medicalRecordModel.findOneAndDelete({ patientId });
+    const deleted = await this.medicalRecordModel.findOneAndDelete({
+      patientId,
+    });
 
     if (!deleted) {
       throw new RpcException('Medical record not found');
@@ -197,9 +202,13 @@ export class RecordService {
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},
-      notes: entry.notes ? (Array.isArray(entry.notes) ? entry.notes : [entry.notes]) : [],
+      notes: entry.notes
+        ? Array.isArray(entry.notes)
+          ? entry.notes
+          : [entry.notes]
+        : [],
       sharedWithDoctors: entry.sharedWithDoctors || [],
     } as RecordEntry;
   }
-  
 }
+

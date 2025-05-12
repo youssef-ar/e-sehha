@@ -1,5 +1,20 @@
+
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+  Request,
+  Headers,
+  UseGuards,
+} from '@nestjs/common';
+
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, Ctx, RmqContext } from '@nestjs/microservices';
+
 import { RecordService } from './medical-records.service';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { recordPatterns } from '@app/contracts/medical-records/records.patterns';
@@ -11,10 +26,12 @@ export class RecordController {
   createOrUpdateMedicalRecord(
     @Payload() data: { patientId: string; newEntry: RecordEntryDto },
     @Ctx() context: RmqContext,
+
   ) {
     const { patientId, newEntry } = data;
     return this.recordService.addOrUpdateMedicalRecord(patientId, newEntry);
   }
+
 
   @MessagePattern(recordPatterns.FIND_ALL)
   findAll(
@@ -25,6 +42,8 @@ export class RecordController {
     return this.recordService.findAll(doctorId, +page, +pageSize);
   }
 
+
+ 
   @MessagePattern(recordPatterns.UPDATE_RECORD)
   updateRecord(
     @Payload() data: { patientId: string; recordId: string; newEntry: RecordEntryDto },
