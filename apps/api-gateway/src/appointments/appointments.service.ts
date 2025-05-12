@@ -19,7 +19,7 @@ export class AppointmentsService {
   private readonly logger = new Logger(AppointmentsService.name);
 
   constructor(
-    @Inject(APPOINTMENTS_SERVICE) private appointmentsClient: ClientProxy,
+    @Inject(APPOINTMENTS_SERVICE) private readonly appointmentsClient: ClientProxy,
   ) {}
 
   async create(

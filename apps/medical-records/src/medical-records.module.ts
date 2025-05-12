@@ -4,9 +4,12 @@ import { RecordController } from './medical-records.controller';
 import { RecordService } from './medical-records.service';
 import { MedicalRecord, MedicalRecordSchema } from './schemas/medical-record.schema';
 import { RecordEntry, RecordEntrySchema } from './schemas/record-entry.schema';
-
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forFeature([
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
       { name: RecordEntry.name, schema: RecordEntrySchema },

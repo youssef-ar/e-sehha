@@ -41,6 +41,7 @@ services:
       - mongodb
     env_file:
       - .env
+
   api-gateway:
     build:
       context: .
@@ -56,6 +57,7 @@ services:
       - appointments
       - medical-records
       - users
+      - symptom-checker
 
   appointments:
     build:
@@ -71,7 +73,20 @@ services:
     depends_on:
       - appointments-db
       - rabbitmq
-
+    
+  symptom-checker:
+    build:
+      context: .
+      dockerfile: ./apps/symptom-checker/Dockerfile
+    ports:
+      - '3010:3000'
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - SYMPTOM_CHECKER_QUEUE=${SYMPTOM_CHECKER_QUEUE}
+      - PORT=3010
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      - rabbitmq
   appointments-db:
     image: postgres:latest
     ports:

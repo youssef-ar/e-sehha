@@ -2,7 +2,6 @@ import {
     IsString,
     IsNotEmpty,
     IsOptional,
-    IsDateString,
     IsObject,
     IsArray
   } from '@nestjs/class-validator';
@@ -11,9 +10,6 @@ import {
     @IsString()
     @IsNotEmpty()
     doctorId: string;
-  
-    @IsDateString()
-    visitDate: Date;
   
     @IsObject()
     @IsOptional()
@@ -27,9 +23,9 @@ import {
     @IsOptional()
     labResults?: Record<string, any>;
   
-    @IsString()
+    @IsObject()
     @IsOptional()
-    notes?: string;
+    notes?: Record<string, any>;
   
     @IsArray()
     @IsOptional()
