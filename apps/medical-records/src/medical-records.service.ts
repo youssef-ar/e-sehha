@@ -58,7 +58,9 @@ export class RecordService {
     newEntry: RecordEntryDto,
   ): Promise<MedicalRecord> {
     if (!patientId || !newEntry?.doctorId) {
-      throw new BadRequestException('Missing required patient or doctor information');
+      throw new BadRequestException(
+        'Missing required patient or doctor information',
+      );
     }
 
     try {
@@ -106,9 +108,7 @@ export class RecordService {
     const result = await this.medicalRecordModel.aggregate(pipeline);
 
     if (!result.length) {
-      throw new NotFoundException(
-        'Medical record not found or access denied',
-      );
+      throw new NotFoundException('Medical record not found or access denied');
     }
 
     return result[0];
@@ -117,7 +117,9 @@ export class RecordService {
   async remove(patientId: string) {
     if (!patientId) throw new BadRequestException('Patient ID is required');
 
-    const deleted = await this.medicalRecordModel.findOneAndDelete({ patientId });
+    const deleted = await this.medicalRecordModel.findOneAndDelete({
+      patientId,
+    });
 
     if (!deleted) {
       throw new NotFoundException('Medical record not found');
@@ -133,7 +135,11 @@ export class RecordService {
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},
-      notes: entry.notes ? (Array.isArray(entry.notes) ? entry.notes : [entry.notes]) : [],
+      notes: entry.notes
+        ? Array.isArray(entry.notes)
+          ? entry.notes
+          : [entry.notes]
+        : [],
       sharedWithDoctors: entry.sharedWithDoctors || [],
     };
   }

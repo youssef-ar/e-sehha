@@ -37,6 +37,15 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
+    "doctor": {
+      "type": "application",
+      "root": "apps/doctor",
+      "entryFile": "main",
+      "sourceRoot": "apps/doctor/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/doctor/tsconfig.app.json"
+      }
+    },
     "medical-records": {
       "type": "application",
       "root": "apps/medical-records",

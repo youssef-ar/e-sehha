@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, Request, Headers, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+  Request,
+  Headers,
+  UseGuards,
+} from '@nestjs/common';
 import { RecordService } from './medical-records.service';
 import { RecordEntryDto } from './dto/record-entry.dto';
 import { AuthGuard } from '@app/shared-auth/guards/auth.guard';
@@ -11,11 +22,10 @@ export class RecordController {
   @Post(':patientId')
   createOrUpdateMedicalRecord(
     @Param('patientId') patientId: string,
-    @Body() newEntry: RecordEntryDto
+    @Body() newEntry: RecordEntryDto,
   ) {
     return this.recordService.addOrUpdateMedicalRecord(patientId, newEntry);
   }
-
 
   @Get()
   findAll(
@@ -27,11 +37,7 @@ export class RecordController {
   }
 
   @Get(':patientId')
-  findOne(
-    @Param('patientId') patientId: string,
-    @Request() req,
-  )
-  {
+  findOne(@Param('patientId') patientId: string, @Request() req) {
     return this.recordService.findOne(patientId, req.user.id);
   }
 

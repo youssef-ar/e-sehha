@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validationSchema } from './config/env.validation';
 import { RateLimiterModule, RateLimiterGuard } from 'nestjs-rate-limiter';
 import { APP_GUARD } from '@nestjs/core';
+import { DoctorModule } from './doctor/doctor.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { APP_GUARD } from '@nestjs/core';
       duration: 60,
     }),
     AppointmentsModule,
+    DoctorModule,
   ],
   providers: [
     {
