@@ -25,7 +25,7 @@ import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
     AppointmentsModule,
     DoctorModule,
     RecordModule,
-    SymptomCheckerModule
+    SymptomCheckerModule,
   ],
   providers: [
     {
