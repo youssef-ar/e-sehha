@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Logger } from '@nestjs/common';
 import { SymptomCheckerService } from './symptom-checker.service';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SymptomCheckerDto } from '@app/contracts/symptom-checker/symptoms.dto';
 
 @Controller('symptom-checker')
@@ -10,6 +10,7 @@ export class SymptomCheckerController {
     constructor(private readonly symptomCheckerService: SymptomCheckerService) {}
 
     @Get()
+    @ApiOperation({ summary: 'Suggests a doctor speciality based on entered symptoms' })
     @ApiResponse({
         status: 200,
         description: 'Response from the symptom checker service',

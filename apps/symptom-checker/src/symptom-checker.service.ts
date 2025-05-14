@@ -19,8 +19,8 @@ export class SymptomCheckerService {
     this.logger.debug(`Received symptoms: ${JSON.stringify(symptoms)}`);
     this.logger.debug(`Symptom: ${symptom}`);
     const prompt = `You are a medical assistant. Your job is to map symptoms to the most relevant doctor speciality. Respond concisely with only the name of the specialty and the severity of the symptoms. A patient is experiencing: "${symptom}". 
-    Based on these symptoms, which medical specialist should they consult?`;
-    this.logger.debug(`Prompt: ${prompt}`);
+    Based on these symptoms, which medical specialist should they consult? Suggest different specialities for different symptoms.
+    If the symptoms are severe, indicate that.`;
     const result = await model.generateContent(prompt);
     const response = result.response;
     return response.text().trim();
