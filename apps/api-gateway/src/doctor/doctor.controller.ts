@@ -21,7 +21,7 @@ import { CreateDoctorDto } from '@app/contracts/doctor/create-doctor.dto';
 import { VerifyDoctorDto } from '@app/contracts/doctor/verify-doctor.dto';
 import { ResponseUtil } from '../utils/response.util';
 import { RescheduleAppointmentDto } from '@app/contracts/appointments';
-import { RecordEntryDto } from 'apps/medical-records/src/dto/record-entry.dto';
+import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 
 @ApiTags('Doctors')
 @Controller('doctors')
@@ -88,20 +88,5 @@ export class DoctorController {
     this.logger.debug(`Doctor cancelling appointment ${id}`);
     const result = await this.doctorService.cancelAppointment(id);
     return ResponseUtil.success('Appointment cancelled', result, HttpStatus.OK);
-  }
-
-  // Medical records routes
-  // waiting for the service to be implemented to follow its dtos etc
-
-  @Post('patients/:id/records')
-  addRecord(@Param('id') patientId: string, @Body() body: RecordEntryDto) {
-    return this.doctorService.addMedicalRecord(patientId, {
-      ...body,
-    });
-  }
-
-  @Get('patients/:id/records')
-  getRecord(@Param('id') patientId: string, @Req() req) {
-    return this.doctorService.getPatientRecords(patientId, req.user.id);
   }
 }
