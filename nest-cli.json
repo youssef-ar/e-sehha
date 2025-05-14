@@ -55,6 +55,15 @@
         "tsConfigPath": "apps/medical-records/tsconfig.app.json"
       }
     },
+    "notifications": {
+      "type": "application",
+      "root": "apps/notifications",
+      "entryFile": "main",
+      "sourceRoot": "apps/notifications/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notifications/tsconfig.app.json"
+      }
+    },
     "shared-auth": {
       "type": "library",
       "root": "libs/shared-auth",
