@@ -8,7 +8,7 @@ import {
   
   export class RecordEntryDto {
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     doctorId: string;
   
     @IsObject()

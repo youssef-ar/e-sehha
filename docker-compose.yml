@@ -58,6 +58,8 @@ services:
       - medical-records
       - users
       - symptom-checker
+    env_file:
+      - .env
 
   appointments:
     build:

@@ -202,11 +202,12 @@ export class RecordService {
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},
-      notes: entry.notes
-        ? Array.isArray(entry.notes)
-          ? entry.notes
-          : [entry.notes]
-        : [],
+      notes: (() => {
+        if (entry.notes) {
+          return Array.isArray(entry.notes) ? entry.notes : [entry.notes];
+        }
+        return [];
+      })(),
       sharedWithDoctors: entry.sharedWithDoctors || [],
     } as RecordEntry;
   }

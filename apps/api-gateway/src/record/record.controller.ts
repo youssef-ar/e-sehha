@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Query, Headers, Logger, HttpStatus, Patch, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Query, Logger, HttpStatus, Patch, Delete, UseGuards } from '@nestjs/common';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RecordService } from './record.service';
@@ -25,9 +25,10 @@ export class RecordController {
     description: 'Bad Request',
   })
   @ApiBody({type: RecordEntryDto})
-  async createOrUpdate(@Param('patientId') patientId: string, @Body() dto: RecordEntryDto) {
-    this.logger.log(`Creating or updating record for patient: ${patientId}`);
+  async createOrUpdate(@Param('patientId') patientId: string, @Body() dto: RecordEntryDto, @CurrentUser('id') doctorId: string) {
+    this.logger.log(`Creating or updating record for patient: ${patientId} by doctor: ${doctorId}`);
     try {
+      dto.doctorId = doctorId.toString();
       const result = await this.recordService.addOrUpdateMedicalRecord(patientId, dto);
       this.logger.log('Record creation/update request processed successfully');
       return ResponseUtil.success('Record created/updated successfully', result, HttpStatus.CREATED);
