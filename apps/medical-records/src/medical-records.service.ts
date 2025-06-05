@@ -1,7 +1,6 @@
 import {
   Injectable,
   Logger,
-  
 } from '@nestjs/common';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { Model, Types } from 'mongoose';
@@ -9,15 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { MedicalRecord } from './schemas/medical-record.schema';
 import { RecordEntry } from './schemas/record-entry.schema';
 import { RpcException } from '@nestjs/microservices';
+import { MedicalRecordEncryptionService } from './encryption';
 
 @Injectable()
 export class RecordService {
-
-  private readonly logger = new Logger(RecordService.name);
-  
-  constructor(
+  private readonly logger = new Logger(RecordService.name);  constructor(
     @InjectModel(MedicalRecord.name)
     private readonly medicalRecordModel: Model<MedicalRecord>,
+    private readonly encryptionService: MedicalRecordEncryptionService,
   ) {}
 
   private buildAuthorizedRecordsAggregation(
@@ -68,19 +66,27 @@ export class RecordService {
     }
 
     try {
-      const existing = await this.medicalRecordModel.findOne({ patientId });
-
-      if (existing) {
+      const existing = await this.medicalRecordModel.findOne({ patientId });      if (existing) {
         const newRecord = this.toRecord(newEntry);
-        existing.records.push(newRecord);
-        return await existing.save();
+        // Encrypt sensitive data before saving
+        const encryptedRecord = this.encryptionService.encryptRecordEntry(newRecord);
+        existing.records.push(encryptedRecord);
+        const saved = await existing.save();
+        // Convert to plain object and return decrypted data
+        const plainObj = saved.toObject();
+        return this.encryptionService.decryptMedicalRecord(plainObj);
       } else {
         const newRecord = this.toRecord(newEntry);
+        // Encrypt sensitive data before saving
+        const encryptedRecord = this.encryptionService.encryptRecordEntry(newRecord);
         const created = new this.medicalRecordModel({
           patientId,
-          records: [newRecord],
+          records: [encryptedRecord],
         });
-        return await created.save();
+        const saved = await created.save();
+        // Return decrypted data as plain object
+        const plainObj = saved.toObject();
+        return this.encryptionService.decryptMedicalRecord(plainObj);
       }
     } catch (error) {
       console.error('Error saving medical record:', error);
@@ -88,7 +94,6 @@ export class RecordService {
     }
     
   }
-
   async findAll(doctorId: string, page = 1, pageSize = 10) {
     if (!doctorId) throw new RpcException('Doctor ID is required');
 
@@ -98,9 +103,9 @@ export class RecordService {
       undefined,
       skip,
       pageSize,
-    );
-
-    return this.medicalRecordModel.aggregate(pipeline);
+    );    const results = await this.medicalRecordModel.aggregate(pipeline);
+    // Decrypt data before returning (results from aggregation are already plain objects)
+    return results.map(record => this.encryptionService.decryptMedicalRecord(record));
   }
 
   async findOne(patientId: string, doctorId: string) {
@@ -111,20 +116,17 @@ export class RecordService {
     const pipeline = this.buildAuthorizedRecordsAggregation(
       doctorId,
       patientId,
-    );
-    const result = await this.medicalRecordModel.aggregate(pipeline);
+    );    const result = await this.medicalRecordModel.aggregate(pipeline);
 
     if (!result.length) {
-
       throw new RpcException(
         'Medical record not found or access denied',
       );
-
     }
 
-    return result[0];
+    // Decrypt data before returning
+    return this.encryptionService.decryptMedicalRecord(result[0]);
   }
-
   async updateRecord(
     patientId: string,
     recordId: string,
@@ -144,9 +146,9 @@ export class RecordService {
     );
     if (!record) {
       throw new RpcException('Record not found');
-    }
-
-    Object.assign(record, newEntry);
+    }    // Encrypt the updated data
+    const encryptedEntry = this.encryptionService.encryptRecordEntryDto(newEntry);
+    Object.assign(record, encryptedEntry);
     await medicalRecord.save();
 
     return { message: 'Record updated successfully' };
@@ -193,20 +195,19 @@ export class RecordService {
     record.sharedWithDoctors.push(doctorIdToAdd);
     await medicalRecord.save();
     return { message: 'Doctor authorization updated successfully' };
-  }
-
-  private toRecord(entry: RecordEntryDto): RecordEntry {
+  }  private toRecord(entry: RecordEntryDto): RecordEntry {
     return {
       _id: new Types.ObjectId(),
       doctorId: entry.doctorId,
       diagnosis: entry.diagnosis || {},
       treatment: entry.treatment || {},
       labResults: entry.labResults || {},
-      notes: entry.notes
-        ? Array.isArray(entry.notes)
-          ? entry.notes
-          : [entry.notes]
-        : [],
+      notes: (() => {
+        if (entry.notes) {
+          return Array.isArray(entry.notes) ? entry.notes : [entry.notes];
+        }
+        return [];
+      })(),
       sharedWithDoctors: entry.sharedWithDoctors || [],
     } as RecordEntry;
   }
