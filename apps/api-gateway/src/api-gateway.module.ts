@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { DoctorModule } from './doctor/doctor.module';
 import { RecordModule } from './record/record.module';
 import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -21,11 +22,11 @@ import { SymptomCheckerModule } from './symptom-checker/symptom-checker.module';
       keyPrefix: 'global',
       points: 10,
       duration: 60,
-    }),
-    AppointmentsModule,
+    }),    AppointmentsModule,
     DoctorModule,
     RecordModule,
     SymptomCheckerModule,
+    UsersModule,
   ],
   providers: [
     {

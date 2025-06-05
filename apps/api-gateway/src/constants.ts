@@ -1,2 +1,3 @@
 export const APPOINTMENTS_SERVICE = Symbol('APPOINTMENTS_SERVICE');
 export const DOCTOR_SERVICE = Symbol('DOCTOR_SERVICE');
+export const USERS_SERVICE = Symbol('USERS_SERVICE');
