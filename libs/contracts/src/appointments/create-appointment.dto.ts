@@ -1,4 +1,9 @@
-import { IsNotEmpty, IsString, IsUUID } from '@nestjs/class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  IsOptional,
+} from '@nestjs/class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsFutureDate } from '../validators';
@@ -15,6 +20,15 @@ export class CreateAppointmentDto {
   @IsUUID()
   @IsNotEmpty()
   doctorId: string;
+
+  @ApiProperty({
+    description: 'The ID of the user creating the appointment',
+    example: 'user-789',
+  })
+  @IsString()
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
 
   @ApiProperty({
     description: 'The date and time of the appointment',

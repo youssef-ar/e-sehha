@@ -75,7 +75,7 @@ services:
     depends_on:
       - appointments-db
       - rabbitmq
-    
+
   symptom-checker:
     build:
       context: .
@@ -100,6 +100,22 @@ services:
     volumes:
       - appointments_db_data:/var/lib/postgresql/data
     restart: always
+
+  doctor:
+    build:
+      context: .
+      dockerfile: ./apps/doctor/Dockerfile
+      target: production
+    ports:
+      - '3004:3000'
+    depends_on:
+      - rabbitmq
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      # - MONGO_URL=mongodb://mongodb:27017/medical-records
 
 volumes:
   mongo_data:

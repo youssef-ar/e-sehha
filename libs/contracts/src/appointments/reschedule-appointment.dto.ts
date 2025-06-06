@@ -1,6 +1,11 @@
-import { IsNotEmpty } from '@nestjs/class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from '@nestjs/class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsFutureDate } from '../validators';
 
 export class RescheduleAppointmentDto {
@@ -13,4 +18,14 @@ export class RescheduleAppointmentDto {
   @Type(() => Date)
   @IsFutureDate({ message: 'New appointment date must be in the future.' })
   newDate: Date;
+
+  @ApiPropertyOptional({
+    description: 'The ID of the user rescheduling the appointment',
+    type: String,
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+  })
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  userId?: string;
 }

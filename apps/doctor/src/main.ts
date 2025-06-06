@@ -24,7 +24,7 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-  const port = configService.get<number>('PORT', 3003);
+  const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
 }
 

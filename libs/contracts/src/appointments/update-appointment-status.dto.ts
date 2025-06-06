@@ -1,6 +1,6 @@
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { AppointmentStatusEnum } from './appointment-status.enum';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAppointmentStatusDto {
   @ApiProperty({
@@ -10,4 +10,14 @@ export class UpdateAppointmentStatusDto {
   })
   @IsEnum(AppointmentStatusEnum)
   status: AppointmentStatusEnum;
+
+  @ApiPropertyOptional({
+    description: 'The ID of the user updating the status',
+    type: String,
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+  })
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  userId?: string;
 }

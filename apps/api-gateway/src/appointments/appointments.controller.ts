@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   Type,
+  UseGuards,
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import {
@@ -31,6 +32,7 @@ import {
 } from '@app/contracts/appointments';
 import { ResponseUtil } from '../utils/response.util';
 import { PaginatedResponseDto } from '@app/contracts/pagination';
+import { AuthGuard, CurrentUser } from '@app/shared-auth';
 
 const ApiPaginatedResponse = <DataDto extends Type<unknown>>(
   dataDto: DataDto,
@@ -56,6 +58,7 @@ const ApiPaginatedResponse = <DataDto extends Type<unknown>>(
     },
   });
 
+@UseGuards(AuthGuard)
 @ApiTags('Appointments')
 @Controller('appointments')
 @ApiExtraModels(PaginatedResponseDto, Appointment)
@@ -73,11 +76,15 @@ export class AppointmentsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiBody({ type: CreateAppointmentDto })
-  async create(@Body() createAppointmentDto: CreateAppointmentDto) {
+  async create(
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @CurrentUser('id') userId: string,
+  ) {
     this.logger.debug(
       `Creating appointment: ${JSON.stringify(createAppointmentDto)}...`,
     );
     try {
+      createAppointmentDto.userId = userId;
       const result =
         await this.appointmentsService.create(createAppointmentDto);
       this.logger.debug('Appointment creation request processed');
@@ -98,12 +105,16 @@ export class AppointmentsController {
   })
   @ApiPaginatedResponse(Appointment)
   @ApiResponse({ status: 400, description: 'Invalid query parameters.' })
-  async findAll(@Query() query: FindAllAppointmentsQueryDto) {
+  async findAll(
+    @Query() query: FindAllAppointmentsQueryDto,
+    @CurrentUser('id') userId: string,
+  ) {
     this.logger.debug(
       `Getting appointments with query: ${JSON.stringify(query)}`,
     );
 
     try {
+      query.userId = userId;
       const result = await this.appointmentsService.findAll(query);
       this.logger.debug('Retrieved appointments');
       return ResponseUtil.success(
@@ -129,7 +140,7 @@ export class AppointmentsController {
     type: Appointment,
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @CurrentUser('id') userId: string) {
     this.logger.debug(`Getting appointment with id: ${id}`);
     try {
       const result = await this.appointmentsService.findOne(id);
@@ -158,11 +169,13 @@ export class AppointmentsController {
   async updateStatus(
     @Param('id') id: string,
     @Body() updateAppointmentStatusDto: UpdateAppointmentStatusDto,
+    @CurrentUser('id') userId: string,
   ) {
     this.logger.debug(
       `Updating appointment status ${id}: ${JSON.stringify(updateAppointmentStatusDto)}`,
     );
     try {
+      updateAppointmentStatusDto.userId = userId;
       const result = await this.appointmentsService.updateStatus(
         id,
         updateAppointmentStatusDto,
@@ -193,7 +206,7 @@ export class AppointmentsController {
     description: 'The appointment has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Appointment not found.' })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @CurrentUser('id') userId: string) {
     this.logger.debug(`Deleting appointment with id: ${id}`);
     try {
       await this.appointmentsService.remove(id);
@@ -222,11 +235,13 @@ export class AppointmentsController {
   async reschedule(
     @Param('id') id: string,
     @Body() rescheduleDto: RescheduleAppointmentDto,
+    @CurrentUser('id') userId: string,
   ) {
     this.logger.debug(
       `Rescheduling appointment ${id}: ${JSON.stringify(rescheduleDto)}`,
     );
     try {
+      rescheduleDto.userId = userId;
       const result = await this.appointmentsService.reschedule(
         id,
         rescheduleDto,

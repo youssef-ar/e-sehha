@@ -10,6 +10,7 @@ import {
   Req,
   Query,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -26,7 +27,9 @@ import { ResponseUtil } from '../utils/response.util';
 import { RescheduleAppointmentDto } from '@app/contracts/appointments';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { DoctorProfileDto } from '@app/contracts/doctor/doctor-profile.dto';
+import { AuthGuard, CurrentUser } from '@app/shared-auth';
 
+@UseGuards(AuthGuard)
 @ApiTags('Doctors')
 @Controller('doctors')
 export class DoctorController {
@@ -60,8 +63,8 @@ export class DoctorController {
   @ApiOperation({ summary: 'Accept an appointment' })
   @ApiParam({ name: 'id', description: 'Appointment ID' })
   @ApiResponse({ status: 200, description: 'Appointment accepted' })
-  async accept(@Param('id') id: string) {
-    this.logger.debug(`Doctor accepting appointment ${id}`);
+  async accept(@Param('id') id: string, @CurrentUser('id') doctorId: string) {
+    this.logger.debug(`Doctor ${doctorId} accepting appointment ${id}`);
     const result = await this.doctorService.acceptAppointment(id);
     return ResponseUtil.success('Appointment accepted', result, HttpStatus.OK);
   }
@@ -74,8 +77,10 @@ export class DoctorController {
   async reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleAppointmentDto,
+    @CurrentUser('id') doctorId: string,
   ) {
-    this.logger.debug(`Doctor rescheduling appointment ${id}`);
+    this.logger.debug(`Doctor ${doctorId} rescheduling appointment ${id}`);
+    dto.userId = doctorId;
     const result = await this.doctorService.rescheduleAppointment(id, dto);
     return ResponseUtil.success(
       'Appointment rescheduled',
@@ -88,8 +93,8 @@ export class DoctorController {
   @ApiOperation({ summary: 'Cancel an appointment' })
   @ApiParam({ name: 'id', description: 'Appointment ID' })
   @ApiResponse({ status: 200, description: 'Appointment cancelled' })
-  async cancel(@Param('id') id: string) {
-    this.logger.debug(`Doctor cancelling appointment ${id}`);
+  async cancel(@Param('id') id: string, @CurrentUser('id') doctorId: string) {
+    this.logger.debug(`Doctor ${doctorId} cancelling appointment ${id}`);
     const result = await this.doctorService.cancelAppointment(id);
     return ResponseUtil.success('Appointment cancelled', result, HttpStatus.OK);
   }
