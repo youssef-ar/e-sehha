@@ -12,6 +12,7 @@ import { NOTIFICATIONS_PATTERNS } from '@app/contracts/notifications/notificatio
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Channel } from './enums/channel.enum';
 import { AuthGuard } from '@app/shared-auth';
+import { EventPattern } from '@nestjs/microservices';
 
 @Controller('notifications')
 export class NotificationController {
@@ -24,6 +25,14 @@ export class NotificationController {
   async send(@Body() dto: CreateNotificationDto) {
     await this.service.dispatch(dto);
     return { status: 'queued' };
+  }
+  @EventPattern(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS)
+  async handleUpcomingAppointment(data: any) {
+    console.log('Received upcoming appointment notification:', data);
+    
+    await this.service.dispatch(data);
+    
+    this.eventEmitter.emit(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS, data);
   }
   
   @Sse('sse')
