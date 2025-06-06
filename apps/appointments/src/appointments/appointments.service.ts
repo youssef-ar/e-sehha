@@ -5,10 +5,13 @@ import {
   FindAllAppointmentsQueryDto,
 } from '@app/contracts/appointments';
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { IAppointmentsRepository } from './appointments.repository.interface';
 import { Appointment } from '@prisma/client';
 import { PaginatedResponseDto } from '@app/contracts/pagination';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NOTIFICATIONS_PATTERNS } from '@app/contracts/notifications/notifications.patterns';
+
 
 @Injectable()
 export class AppointmentsService {
@@ -17,10 +20,24 @@ export class AppointmentsService {
   constructor(
     @Inject(IAppointmentsRepository)
     private readonly appointmentsRepository: IAppointmentsRepository,
+    @Inject('NOTIFICATIONS_SERVICE')
+    private readonly notificationsClient: ClientProxy,
+    private readonly eventEmitter: EventEmitter2, 
   ) {}
 
-  async create(createAppointmentDto: CreateAppointmentDto) {
-    return this.appointmentsRepository.create(createAppointmentDto);
+  async create(createAppointmentDto: CreateAppointmentDto, email?:string, phone?:string) {
+    const appointment= await this.appointmentsRepository.create(createAppointmentDto);
+    this.notificationsClient.emit(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS, {
+      userId: appointment.patientId,
+      message: `You have an upcoming appointment on ${appointment.date}`,
+      title: "Upcoming Appointment",
+      channels: ['email', 'sms', 'sse'],
+      type: NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS,
+      email: email,
+      phone: phone,
+    })
+    return appointment;
+
   }
 
   async findAll(
