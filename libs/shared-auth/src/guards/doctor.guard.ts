@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException, Logger }
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
-export class AdminGuard implements CanActivate {
+export class DoctorGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   private readonly logger = new Logger('AdminGuard');
   canActivate(context: ExecutionContext): boolean {

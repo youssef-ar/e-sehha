@@ -3,10 +3,11 @@ import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto'
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RecordService } from './record.service';
 import { ResponseUtil } from '../utils/response.util';
-import { AuthGuard, CurrentUser } from '@app/shared-auth';
+import { CurrentUser } from '@app/shared-auth';
+import { DoctorGuard } from '@app/shared-auth/guards/doctor.guard';
 
 
-@UseGuards(AuthGuard)
+@UseGuards(DoctorGuard)
 @Controller('record')
 @ApiTags('Record')
 export class RecordController {
