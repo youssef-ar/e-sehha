@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Logger } from '@nestjs/common';
+import { Body, Controller, Get, Logger, UseGuards } from '@nestjs/common';
 import { SymptomCheckerService } from './symptom-checker.service';
 import { ApiResponse } from '@nestjs/swagger';
 import { SymptomCheckerDto } from '@app/contracts/symptom-checker/symptoms.dto';
+import { AuthGuard } from '@app/shared-auth';
 
+
+@UseGuards(AuthGuard)
 @Controller('symptom-checker')
 export class SymptomCheckerController {
     private readonly logger = new Logger(SymptomCheckerController.name);

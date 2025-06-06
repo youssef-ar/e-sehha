@@ -13,9 +13,9 @@ export class AdminGuard implements CanActivate {
       throw new ForbiddenException('No user found in request');
     }
 
-    if (user.role !== 'ADMIN') {
-        this.logger.warn(`Access denied for user ${user.id} — not an admin`);
-        throw new ForbiddenException('Admins only');
+    if (user.role !== 'DOCTOR') {
+        this.logger.warn(`Access denied for user ${user.id} — not a doctor`);
+        throw new ForbiddenException('Doctors only');
       }
 
     return true;

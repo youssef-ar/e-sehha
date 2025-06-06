@@ -17,4 +17,13 @@ export class UsersService {
     }
     return users;
   }
+
+  async getUserById(id: string) {
+    const user = await clerkClient.users.getUser(id);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const { username, firstName, lastName } = user;
+    return { username, firstName, lastName };
+  }
 }

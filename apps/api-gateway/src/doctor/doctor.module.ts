@@ -16,7 +16,7 @@ import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [configService.get<string>('RABBITMQ_URL')],
+            urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost')],
             queue: configService.get<string>('DOCTOR_QUEUE', 'doctor_queue'),
             queueOptions: {
               durable: true,
@@ -34,7 +34,7 @@ import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
-            urls: [configService.get<string>('RABBITMQ_URL')],
+            urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost')],
             queue: configService.get<string>(
               'APPOINTMENTS_QUEUE',
               'appointments_queue',
