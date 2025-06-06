@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
-import { NotificationsController } from './notifications.controller';
-import { NotificationsService } from './notifications.service';
+import { NotificationController } from './notifications.controller';
+import { NotificationService } from './notifications.service';
 import { EmailService } from './email/email.service';
 import { SmsService } from './sms/sms.service';
-import { SseService } from './sse/sse.service';
-import { SseController } from './sse/sse.controller';
-import { EmailModule } from './email/email.module'; // ✅ Import EmailModule
-import { SseModule } from './sse/sse.module'; // ✅
+import { EmailModule } from './email/email.module'; 
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ConfigModule } from '@nestjs/config';
+import { SharedAuthModule } from '@app/shared-auth';
+
 
 
 @Module({
-  imports: [EmailModule, SseModule], // ✅ Register it here
-  controllers: [NotificationsController, SseController],
-  providers: [NotificationsService, EmailService, SmsService, SseService],
+  imports: [EmailModule,EventEmitterModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env', 
+    }),SharedAuthModule], 
+  controllers: [NotificationController],
+  providers: [NotificationService, EmailService, SmsService],
 })
 export class NotificationsModule {}

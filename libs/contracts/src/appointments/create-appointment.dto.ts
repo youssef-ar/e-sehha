@@ -6,13 +6,13 @@ import { IsFutureDate } from '../validators';
 export class CreateAppointmentDto {
   @ApiProperty({ description: 'The ID of the patient', example: 'user-123' })
   @IsString()
-  @IsUUID()
+  //@IsUUID()
   @IsNotEmpty()
   patientId: string;
 
   @ApiProperty({ description: 'The ID of the doctor', example: 'doctor-456' })
   @IsString()
-  @IsUUID()
+  //@IsUUID()
   @IsNotEmpty()
   doctorId: string;
 

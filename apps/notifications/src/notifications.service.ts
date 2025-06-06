@@ -1,32 +1,39 @@
 import { Injectable } from '@nestjs/common';
+import { filter, fromEventPattern, map, Observable, Subject } from 'rxjs';
+import { Channel } from './enums/channel.enum';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 import { EmailService } from './email/email.service';
 import { SmsService } from './sms/sms.service';
-import { SseService } from './sse/sse.service';
-import { NotifyDto } from './dto/notify.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NOTIFICATIONS_PATTERNS } from '@app/contracts/notifications/notifications.patterns';
 
 @Injectable()
-export class NotificationsService {
+export class NotificationService {
   constructor(
     private readonly emailService: EmailService,
     private readonly smsService: SmsService,
-    private readonly sseService: SseService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async sendNotification(dto: NotifyDto) {
-    const { email, phone, subject, message } = dto;
+  async dispatch(dto: CreateNotificationDto) {
+    const { title, message } = dto;
 
-    if (email && subject && message) {
-      await this.emailService.sendEmail(email, subject, message);
+    // SSE
+    /* if (dto.channels.includes(Channel.SSE)) {
+      this.sse(dto.userId);
+    }
+ */
+    // Email
+    if (dto.channels.includes(Channel.EMAIL) && dto.email) {
+      await this.emailService.send(dto.email, title, message);
     }
 
-    /*if (phone && message) {
-      await this.smsService.sendSms(phone, message);
-    }*/
-
-    if (message) {
-      this.sseService.sendNotification(message);
+    // SMS
+    if (dto.channels.includes(Channel.SMS) && dto.phone) {
+      await this.smsService.send(dto.phone, `${title}: ${message}`);
     }
-
-    return { status: 'Notification sent successfully' };
   }
+
+  
+  
 }
