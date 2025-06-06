@@ -8,7 +8,7 @@ export class SmsService {
     process.env.TWILIO_TOKEN
   );
 
-  async sendSms(to: string, message: string) {
+  async send(to: string, message: string) {
     await this.client.messages.create({
       body: message,
       from: process.env.TWILIO_PHONE,

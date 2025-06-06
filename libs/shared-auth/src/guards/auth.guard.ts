@@ -15,6 +15,8 @@ export class AuthGuard implements CanActivate {
       return false;
     }
     try {
+      this.logger.debug(process.env.CLERK_SECRET_KEY);
+      this.logger.debug(process.cwd());
       const payload= await verifyToken(token, {
         secretKey: process.env.CLERK_SECRET_KEY!,
       });

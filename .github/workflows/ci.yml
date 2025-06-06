@@ -16,6 +16,11 @@ jobs:
     outputs:
       users: ${{ steps.filter.outputs.users }}
       medical-records: ${{ steps.filter.outputs.medical-records }}
+      appointments: ${{ steps.filter.outputs.appointments }}
+      doctor: ${{ steps.filter.outputs.doctor }}
+      notifications: ${{ steps.filter.outputs.notifications }}
+      symptom-checker: ${{ steps.filter.outputs.symptom-checker }}
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -30,139 +35,78 @@ jobs:
               - 'apps/users/**'
             medical-records:
               - 'apps/medical-records/**'
+            appointments:
+              - 'apps/appointments/**'
+            doctor:
+              - 'apps/doctor/**'
+            notifications:
+              - 'apps/notifications/**'
+            symptom-checker:
+              - 'apps/symptom-checker/**'
+            api-gateway:
+              - 'apps/api-gateway/**'
+            
   users:
-    name: Build, Test, Scan & Publish users service
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.users == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-  
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-  
-      - name: Install dependencies (root)
-        run: |
-          npm ci
-  
-      - name: Lint users service
-        working-directory: apps/users
-        run: npm run lint
-        continue-on-error: true
-  
-      #- name: Test users
-       # working-directory: apps/users
-       # run: npm test
-  
-      - name: Build users service
-        #working-directory: ./
-        run: npm run build users
-  
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-  
-      - name: Set up QEMU (for multi-arch)
-        uses: docker/setup-qemu-action@v2
-  
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-  
-      - name: Build Docker image (without push)
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./apps/users/Dockerfile
-          load: true      
-          tags: users:local
-  
-      - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: users:local
-          format: table
-          exit-code: 0        
-          severity: CRITICAL,HIGH
-  
-      - name: Build and push Docker image (users)
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./apps/users/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/users:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/users:${{ github.sha }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: users
+      service-dir: apps/users
+      dockerfile-path: ./apps/users/Dockerfile
+    secrets: inherit
+
   medical-records:
-    name: Build, Test, Scan & Publish medical-records service
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.medical-records == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-  
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-  
-      - name: Install dependencies (root)
-        run: |
-          npm ci
-  
-      - name: Lint medical-records service
-        working-directory: apps/medical-records
-        run: npm run lint
-        continue-on-error: true
-  
-      #- name: Test medical-records
-       # working-directory: apps/medical-records
-       # run: npm test
-  
-      - name: Build medical-records service
-        #working-directory: ./
-        run: npm run build medical-records
-  
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-  
-      - name: Set up QEMU (for multi-arch)
-        uses: docker/setup-qemu-action@v2
-  
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-  
-      - name: Build Docker image (without push)
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./apps/medical-records/Dockerfile
-          load: true      
-          tags: medical-records:local
-  
-      - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: medical-records:local
-          format: table
-          exit-code: 0        
-          severity: CRITICAL,HIGH
-  
-      - name: Build and push Docker image (medical-records)
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./apps/medical-records/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/medical-records:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/medical-records:${{ github.sha }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: medical-records
+      service-dir: apps/medical-records
+      dockerfile-path: ./apps/medical-records/Dockerfile
+    secrets: inherit
+  appointments:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.appointments == 'true' }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: appointments
+      service-dir: apps/appointments
+      dockerfile-path: ./apps/appointments/Dockerfile
+    secrets: inherit
+  doctor:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.doctor == 'true' }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: doctor
+      service-dir: apps/doctor
+      dockerfile-path: ./apps/doctor/Dockerfile
+    secrets: inherit
+  notifications:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.notifications == 'true' }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: notifications
+      service-dir: apps/notifications
+      dockerfile-path: ./apps/notifications/Dockerfile
+    secrets: inherit
+  symptom-checker:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.symptom-checker == 'true' }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: symptom-checker
+      service-dir: apps/symptom-checker
+      dockerfile-path: ./apps/symptom-checker/Dockerfile
+    secrets: inherit
+  api-gateway:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.api-gateway == 'true' }}
+    uses: ./.github/workflows/microservice_ci_template.yml
+    with:
+      service-name: api-gateway
+      service-dir: apps/api-gateway
+      dockerfile-path: ./apps/api-gateway/Dockerfile
+    secrets: inherit
