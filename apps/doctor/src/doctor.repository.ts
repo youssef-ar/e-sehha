@@ -18,5 +18,8 @@ export class DoctorRepository {
     return this.doctorModel.findOne({ email });
   }
 
+  async findById(id: string) {
+    return this.doctorModel.findById(id);
+  }
   // Add more queries as needed
 }

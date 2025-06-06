@@ -14,4 +14,9 @@ export class DoctorController {
   registerDoctor(data: CreateDoctorDto) {
     return this.doctorService.registerDoctor(data);
   }
+
+  @MessagePattern(DOCTOR_PATTERNS.GET_PROFILE)
+  getDoctorProfile(data: string) {
+    return this.doctorService.getDoctorProfile(data);
+  }
 }

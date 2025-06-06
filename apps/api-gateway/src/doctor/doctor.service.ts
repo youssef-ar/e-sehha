@@ -10,6 +10,7 @@ import { RescheduleAppointmentDto } from '@app/contracts/appointments';
 import { AppointmentStatusEnum } from '@app/contracts/appointments/appointment-status.enum';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { recordPatterns } from '@app/contracts/medical-records/records.patterns';
+import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
 
 @Injectable()
 export class DoctorService {
@@ -18,6 +19,7 @@ export class DoctorService {
   constructor(
     @Inject(DOCTOR_SERVICE) private doctorClient: ClientProxy,
     @Inject(APPOINTMENTS_SERVICE) private appointmentsClient: ClientProxy,
+    @Inject(RECORD_SERVICE) private recordsClient: ClientProxy,
   ) {}
 
   async registerDoctor(dto: CreateDoctorDto) {
@@ -77,6 +79,124 @@ export class DoctorService {
       );
     } catch (error) {
       handleRpcError(error, this.logger, 'cancel appointment');
+    }
+  }
+
+  async createOrUpdateMedicalRecord(patientId: string, entry: RecordEntryDto) {
+    this.logger.debug(
+      `Doctor creating/updating record for patient ${patientId}`,
+    );
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send(recordPatterns.CREATE_UPDATE, {
+          patientId,
+          newEntry: entry,
+        }),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'create/update medical record');
+    }
+  }
+
+  async getAllPatientRecords(doctorId: string, page = 1, pageSize = 10) {
+    this.logger.debug(`Doctor ${doctorId} retrieving all patient records`);
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send(recordPatterns.FIND_ALL, {
+          doctorId,
+          page,
+          pageSize,
+        }),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'retrieve all medical records');
+    }
+  }
+
+  async getPatientRecord(patientId: string, requesterId: string) {
+    this.logger.debug(
+      `Doctor ${requesterId} requesting record for patient ${patientId}`,
+    );
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send(recordPatterns.FIND_ONE, {
+          patientId,
+          requesterId,
+        }),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'retrieve single medical record');
+    }
+  }
+
+  async updateRecordEntry(
+    patientId: string,
+    recordId: string,
+    entry: RecordEntryDto,
+  ) {
+    this.logger.debug(
+      `Updating record entry ${recordId} for patient ${patientId}`,
+    );
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send(recordPatterns.UPDATE_RECORD, {
+          patientId,
+          recordId,
+          newEntry: entry,
+        }),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'update record entry');
+    }
+  }
+
+  async authorizeDoctorForRecord(
+    doctorId: string,
+    patientId: string,
+    recordId: string,
+    doctorIdToAdd: string,
+  ) {
+    this.logger.debug(
+      `Doctor ${doctorId} authorizing Doctor ${doctorIdToAdd} on record ${recordId}`,
+    );
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send(recordPatterns.GIVE_AUTHORIZATION, {
+          doctorId,
+          patientId,
+          recordId,
+          doctorIdToAdd,
+        }),
+      );
+    } catch (error) {
+      handleRpcError(
+        error,
+        this.logger,
+        'give authorization to audit medical record',
+      );
+    }
+  }
+
+  async removePatientRecord(patientId: string) {
+    this.logger.warn(`Removing record for patient ${patientId}`);
+    try {
+      return await lastValueFrom(
+        this.recordsClient.send('record.remove', patientId),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'remove medical record');
+    }
+  }
+
+  async getDoctorProfile(id: string) {
+    this.logger.debug(`Getting profile for doctor ${id}`);
+    try {
+      const doctorData = await lastValueFrom(
+        this.doctorClient.send(DOCTOR_PATTERNS.GET_PROFILE, id),
+      );
+      return doctorData;
+    } catch (error) {
+      handleRpcError(error, this.logger, 'get doctor profile');
     }
   }
 }

@@ -14,4 +14,8 @@ export class DoctorService {
       verified: false,
     });
   }
+
+  async getDoctorProfile(id: string) {
+    return this.repo.findById(id);
+  }
 }

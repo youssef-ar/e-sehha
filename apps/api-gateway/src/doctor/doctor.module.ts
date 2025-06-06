@@ -4,6 +4,7 @@ import { DoctorController } from './doctor.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DOCTOR_SERVICE, APPOINTMENTS_SERVICE } from '../constants';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
 
 @Module({
   imports: [
@@ -38,6 +39,24 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
               'APPOINTMENTS_QUEUE',
               'appointments_queue',
             ),
+            queueOptions: {
+              durable: true,
+            },
+            socketOptions: {
+              timeout: 5000,
+            },
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: RECORD_SERVICE,
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RECORD_QUEUE', 'record_queue'),
             queueOptions: {
               durable: true,
             },
