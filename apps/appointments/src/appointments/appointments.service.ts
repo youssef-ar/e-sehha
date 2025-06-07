@@ -110,6 +110,29 @@ export class AppointmentsService {
       id,
       rescheduleDto,
     );
+    try {
+  this.logger.debug('Attempting to emit reschedule notification...');
+  this.logger.debug(`Pattern: ${NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS}`);
+  this.logger.debug(`Payload: ${JSON.stringify({
+    userId: updatedAppointment.patientId,
+    message: `Your appointment has been rescheduled to ${updatedAppointment.date}`,
+    title: "Appointment Rescheduled",
+    channels: ['email', 'sms', 'sse'],
+    type: NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS,
+  })}`);
+  
+  this.notificationsClient.emit(NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS, {
+    userId: updatedAppointment.patientId,
+    message: `Your appointment has been rescheduled to ${updatedAppointment.date}`,
+    title: "Appointment Rescheduled",
+    channels: ['email', 'sms', 'sse'],
+    type: NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS,
+  });
+  
+  this.logger.debug('Notification emission completed');
+} catch (error) {
+  this.logger.error('Failed to emit notification:', error);
+}
 
     this.logger.debug(`Successfully rescheduled appointment ${id}`);
 

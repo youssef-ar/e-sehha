@@ -30,8 +30,8 @@ async function bootstrap() {
     })
   );
   app.useGlobalInterceptors(new ResponseInterceptor());
-
-  await app.listen(configService.get<number>('PORT', 3003)).then(() => {
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port).then(() => {
     console.log(`✅ Symptom Checker microservice is now listening to RabbitMQ`);
   });
 

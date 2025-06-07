@@ -26,7 +26,7 @@ export class CreateAppointmentDto {
     example: 'user-789',
   })
   @IsString()
-  @IsUUID()
+  //@IsUUID()
   @IsOptional()
   userId?: string;
 

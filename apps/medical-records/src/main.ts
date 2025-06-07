@@ -36,8 +36,8 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ResponseInterceptor());
-
-  await app.listen(configService.get<number>('PORT', 3002));
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port);
   await app.startAllMicroservices();
 
   console.log(`✅ Medical Records microservice is now listening to RabbitMQ`);
