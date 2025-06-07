@@ -43,6 +43,15 @@ async handleRescheduledAppointment(data: any) {
   
   this.eventEmitter.emit(data.type, data);
 }
+
+@EventPattern(NOTIFICATIONS_PATTERNS.CANCELED_APPOINTMENTS)
+async handleCancelledAppointment(data: any) {
+  console.log('Received cancelled appointment notification:', data);
+  
+  await this.service.dispatch(data);
+  
+  this.eventEmitter.emit(data.type, data);
+}
   
   @Sse('sse')
   @UseGuards(AuthGuard)

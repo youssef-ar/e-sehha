@@ -84,7 +84,7 @@ export class AppointmentsController {
       `Creating appointment: ${JSON.stringify(createAppointmentDto)}...`,
     );
     try {
-      createAppointmentDto.userId = userId;
+      createAppointmentDto.patientId = userId;
       const result =
         await this.appointmentsService.create(createAppointmentDto);
       this.logger.debug('Appointment creation request processed');

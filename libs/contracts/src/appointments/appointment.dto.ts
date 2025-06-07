@@ -1,9 +1,11 @@
 import {
   AppointmentStatus,
+  AppointmentType,
   Appointment as PrismaAppointment,
 } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { AppointmentStatusEnum } from './appointment-status.enum';
+import { AppointmentTypeEnum } from './appointment-type.enum';
 
 export class Appointment implements PrismaAppointment {
   @ApiProperty({
@@ -46,7 +48,6 @@ export class Appointment implements PrismaAppointment {
     description: 'Timestamp when the appointment was created',
   })
   createdAt: Date;
-
   @ApiProperty({
     type: String,
     format: 'date-time',
@@ -54,6 +55,28 @@ export class Appointment implements PrismaAppointment {
     description: 'Timestamp when the appointment was last updated',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    type: String,
+    example: '10:00',
+    description: 'Time of the appointment',
+  })
+  time: string;
+
+  @ApiProperty({
+    type: Number,
+    example: 150.00,
+    description: 'Price of the appointment',
+  })
+  price: number;
+  @ApiProperty({
+    enum: AppointmentTypeEnum,
+    example: AppointmentTypeEnum.IN_PERSON,
+    description: 'Type of the appointment',
+  })
+  type: AppointmentType;
+
+  
 }
 
 export type { PrismaAppointment };
