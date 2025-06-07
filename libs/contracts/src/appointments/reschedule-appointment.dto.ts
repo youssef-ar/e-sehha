@@ -26,6 +26,6 @@ export class RescheduleAppointmentDto {
   })
   @IsOptional()
   @IsString()
-  @IsUUID()
+  //@IsUUID()
   userId?: string;
 }
