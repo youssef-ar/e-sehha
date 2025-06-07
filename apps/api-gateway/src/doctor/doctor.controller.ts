@@ -22,11 +22,9 @@ import {
 } from '@nestjs/swagger';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto } from '@app/contracts/doctor/create-doctor.dto';
-import { VerifyDoctorDto } from '@app/contracts/doctor/verify-doctor.dto';
 import { ResponseUtil } from '../utils/response.util';
 import { RescheduleAppointmentDto } from '@app/contracts/appointments';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
-import { DoctorProfileDto } from '@app/contracts/doctor/doctor-profile.dto';
 import { AuthGuard, CurrentUser } from '@app/shared-auth';
 
 @UseGuards(AuthGuard)
@@ -44,9 +42,13 @@ export class DoctorController {
     status: 201,
     description: 'Doctor created successfully',
   })
-  async registerDoctor(@Body() dto: CreateDoctorDto) {
+  async registerDoctor(
+    @Body() dto: CreateDoctorDto,
+    @CurrentUser('id') userId: string,
+  ) {
     this.logger.debug(`Registering doctor: ${JSON.stringify(dto)}`);
     try {
+      dto.userId = userId;
       const result = await this.doctorService.registerDoctor(dto);
       return ResponseUtil.success(
         'Doctor registered',
@@ -80,7 +82,6 @@ export class DoctorController {
     @CurrentUser('id') doctorId: string,
   ) {
     this.logger.debug(`Doctor ${doctorId} rescheduling appointment ${id}`);
-    dto.userId = doctorId;
     const result = await this.doctorService.rescheduleAppointment(id, dto);
     return ResponseUtil.success(
       'Appointment rescheduled',
@@ -237,7 +238,6 @@ export class DoctorController {
   @ApiResponse({
     status: 200,
     description: 'Doctor profile retrieved successfully',
-    type: DoctorProfileDto,
   })
   async getDoctorProfile(@Param('id') id: string) {
     this.logger.debug(`Getting profile for doctor ${id}`);

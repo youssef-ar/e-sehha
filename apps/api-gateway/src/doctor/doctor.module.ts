@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { DoctorController } from './doctor.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { DOCTOR_SERVICE, APPOINTMENTS_SERVICE } from '../constants';
+import {
+  DOCTOR_SERVICE,
+  APPOINTMENTS_SERVICE,
+  USERS_SERVICE,
+} from '../constants';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
 
@@ -63,6 +67,26 @@ import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
               configService.get<string>('RABBITMQ_URL', 'amqp://localhost'),
             ],
             queue: configService.get<string>('RECORD_QUEUE', 'record_queue'),
+            queueOptions: {
+              durable: true,
+            },
+            socketOptions: {
+              timeout: 5000,
+            },
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: USERS_SERVICE,
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [
+              configService.get<string>('RABBITMQ_URL', 'amqp://localhost'),
+            ],
+            queue: configService.get<string>('USERS_QUEUE', 'users_queue'),
             queueOptions: {
               durable: true,
             },
