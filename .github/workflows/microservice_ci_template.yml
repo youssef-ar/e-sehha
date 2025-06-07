@@ -38,6 +38,9 @@ jobs:
       # - name: Test
       #   working-directory: ${{ inputs.service-dir }}
       #   run: npm test
+      - name: generate Prisma client
+        working-directory: ./apps/appointments
+        run: npx prisma generate
 
       - name: Build ${{ inputs.service-name }} service
         run: npm run build ${{ inputs.service-name }}
