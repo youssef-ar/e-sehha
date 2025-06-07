@@ -4,13 +4,18 @@ import { CreateDoctorDto } from '@app/contracts/doctor/create-doctor.dto';
 import { lastValueFrom } from 'rxjs';
 import { handleRpcError } from '../utils/error-handler.util';
 import { DOCTOR_PATTERNS } from '@app/contracts/doctor/doctor.patterns';
-import { APPOINTMENTS_SERVICE, DOCTOR_SERVICE } from '../constants';
+import {
+  APPOINTMENTS_SERVICE,
+  DOCTOR_SERVICE,
+  USERS_SERVICE,
+} from '../constants';
 import { APPOINTMENTS_PATTERNS } from '@app/contracts/appointments/appointments.patterns';
 import { RescheduleAppointmentDto } from '@app/contracts/appointments';
 import { AppointmentStatusEnum } from '@app/contracts/appointments/appointment-status.enum';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { recordPatterns } from '@app/contracts/medical-records/records.patterns';
 import { RECORD_SERVICE } from '@app/contracts/medical-records/constants';
+import { USERS_PATTERNS } from '@app/contracts/users/users.patterns';
 
 @Injectable()
 export class DoctorService {
@@ -20,11 +25,13 @@ export class DoctorService {
     @Inject(DOCTOR_SERVICE) private doctorClient: ClientProxy,
     @Inject(APPOINTMENTS_SERVICE) private appointmentsClient: ClientProxy,
     @Inject(RECORD_SERVICE) private recordsClient: ClientProxy,
+    @Inject(USERS_SERVICE) private usersClient: ClientProxy,
   ) {}
 
   async registerDoctor(dto: CreateDoctorDto) {
     this.logger.debug(`Registering doctor: ${JSON.stringify(dto)}`);
     try {
+      this.usersClient.send(USERS_PATTERNS.CREATE_DOCTOR, dto.email);
       const result = await lastValueFrom(
         this.doctorClient.send(DOCTOR_PATTERNS.REGISTER, dto),
       );
