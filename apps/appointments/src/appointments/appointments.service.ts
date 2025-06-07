@@ -82,7 +82,7 @@ export class AppointmentsService {
     return updated;
   }
 
-  async remove(id: string) {
+  async remove(id: string, email?: string, phone?: string) {
     this.logger.debug(`Removing appointment with ID: ${id}`);
 
     const exists = await this.appointmentsRepository.exists(id);
@@ -92,12 +92,21 @@ export class AppointmentsService {
     }
 
     const removed = await this.appointmentsRepository.delete(id);
+    this.notificationsClient.emit(NOTIFICATIONS_PATTERNS.CANCELED_APPOINTMENTS, {
+      userId: removed.patientId,
+      message: `Your appointment has been canceled.`,
+      title: "Appointment Canceled",
+      channels: ['email', 'sms', 'sse'],
+      type: NOTIFICATIONS_PATTERNS.CANCELED_APPOINTMENTS,
+      email: email,
+      phone: phone,
+    })
 
     this.logger.debug(`Removed appointment with ID: ${id}`);
     return removed;
   }
 
-  async reschedule(id: string, rescheduleDto: RescheduleAppointmentDto) {
+  async reschedule(id: string, rescheduleDto: RescheduleAppointmentDto, email?: string, phone?: string) {
     this.logger.debug(`Rescheduling appointment ${id} to new date`);
 
     const exists = await this.appointmentsRepository.exists(id);
@@ -110,16 +119,7 @@ export class AppointmentsService {
       id,
       rescheduleDto,
     );
-    try {
-  this.logger.debug('Attempting to emit reschedule notification...');
-  this.logger.debug(`Pattern: ${NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS}`);
-  this.logger.debug(`Payload: ${JSON.stringify({
-    userId: updatedAppointment.patientId,
-    message: `Your appointment has been rescheduled to ${updatedAppointment.date}`,
-    title: "Appointment Rescheduled",
-    channels: ['email', 'sms', 'sse'],
-    type: NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS,
-  })}`);
+    
   
   this.notificationsClient.emit(NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS, {
     userId: updatedAppointment.patientId,
@@ -127,13 +127,10 @@ export class AppointmentsService {
     title: "Appointment Rescheduled",
     channels: ['email', 'sms', 'sse'],
     type: NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS,
+    email: email,
+    phone: phone,
   });
   
-  this.logger.debug('Notification emission completed');
-} catch (error) {
-  this.logger.error('Failed to emit notification:', error);
-}
-
     this.logger.debug(`Successfully rescheduled appointment ${id}`);
 
     return updatedAppointment;

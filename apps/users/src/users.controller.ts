@@ -18,5 +18,9 @@ export class UsersController {
   async getUserById(@Payload() id: string) {
     return this.usersService.getUserById(id);
   }
+  @MessagePattern(USERS_PATTERNS.CREATE_DOCTOR)
+  async validateDoctor(@Payload() email: string) {
+    return this.usersService.validateDoctor(email);
+  }
   
 }

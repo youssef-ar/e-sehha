@@ -20,6 +20,11 @@ enum AppointmentStatus {
   COMPLETED
 }
 
+enum AppointmentType {
+  IN_PERSON
+  VIDEO
+}
+
 model Appointment {
   id          String              @id @default(uuid())
   patientId   String
@@ -28,4 +33,7 @@ model Appointment {
   status      AppointmentStatus   @default(PENDING)
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  time       String
+  price       Float
+  type     AppointmentType
 }
