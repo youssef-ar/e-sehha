@@ -16,7 +16,10 @@ import { DoctorSchema } from './schema/doctor.schema';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
+        uri: configService.get<string>(
+          'MONGO_URI',
+          'mongodb://localhost:27017',
+        ),
         dbName: 'e-sihha',
       }),
       inject: [ConfigService],
