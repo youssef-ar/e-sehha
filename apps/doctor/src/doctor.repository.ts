@@ -21,5 +21,13 @@ export class DoctorRepository {
   async findById(id: string) {
     return this.doctorModel.findById(id);
   }
+
+  async findAll() {
+    return this.doctorModel.find();
+  }
+
+  async verifyDoctor(id: string) {
+    return this.doctorModel.findByIdAndUpdate(id, { verified: true });
+  }
   // Add more queries as needed
 }

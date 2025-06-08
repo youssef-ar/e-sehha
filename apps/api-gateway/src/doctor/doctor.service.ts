@@ -42,6 +42,16 @@ export class DoctorService {
     }
   }
 
+  async getDoctors() {
+    try {
+      return await lastValueFrom(
+        this.doctorClient.send(DOCTOR_PATTERNS.GET_DOCTORS, {}),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'get doctors');
+    }
+  }
+
   async acceptAppointment(id: string) {
     try {
       return await lastValueFrom(

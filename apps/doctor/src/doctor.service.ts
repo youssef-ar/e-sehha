@@ -19,4 +19,12 @@ export class DoctorService {
   async getDoctorProfile(id: string) {
     return this.repo.findById(id);
   }
+
+  async getDoctors() {
+    return this.repo.findAll();
+  }
+
+  async verifyDoctor(id: string) {
+    return this.repo.verifyDoctor(id);
+  }
 }
