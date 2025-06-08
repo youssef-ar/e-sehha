@@ -11,7 +11,7 @@ import { Observable, filter, fromEventPattern, map } from 'rxjs';
 import { NOTIFICATIONS_PATTERNS } from '@app/contracts/notifications/notifications.patterns';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Channel } from './enums/channel.enum';
-import { AuthGuard } from '@app/shared-auth';
+import { AuthGuard, CurrentUser } from '@app/shared-auth';
 import { EventPattern } from '@nestjs/microservices';
 
 @Controller('notifications')
@@ -27,17 +27,35 @@ export class NotificationController {
     return { status: 'queued' };
   }
   @EventPattern(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS)
-  async handleUpcomingAppointment(data: any) {
-    console.log('Received upcoming appointment notification:', data);
-    
-    await this.service.dispatch(data);
-    
-    this.eventEmitter.emit(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS, data);
-  }
+async handleUpcomingAppointment(data: any) {
+  console.log('Received upcoming appointment notification:', data);
+  
+  await this.service.dispatch(data);
+  
+  this.eventEmitter.emit(data.type, data);
+}
+
+@EventPattern(NOTIFICATIONS_PATTERNS.RESCHEDULED_APPOINTMENTS)
+async handleRescheduledAppointment(data: any) {
+  console.log('Received rescheduled appointment notification:', data);
+  
+  await this.service.dispatch(data);
+  
+  this.eventEmitter.emit(data.type, data);
+}
+
+@EventPattern(NOTIFICATIONS_PATTERNS.CANCELED_APPOINTMENTS)
+async handleCancelledAppointment(data: any) {
+  console.log('Received cancelled appointment notification:', data);
+  
+  await this.service.dispatch(data);
+  
+  this.eventEmitter.emit(data.type, data);
+}
   
   @Sse('sse')
   @UseGuards(AuthGuard)
-  sse(userId: string): Observable<{ data: any; type?: string }> {
+  sse(@CurrentUser('id') userId: string): Observable<{ data: any; type?: string }> {
     const eventNames = Object.values(NOTIFICATIONS_PATTERNS);
 
     return fromEventPattern(
@@ -54,6 +72,9 @@ export class NotificationController {
     ).pipe(
       filter((event: any) => {
         console.log('Received event:', event);
+        console.log('User ID:', userId);
+
+        console.log('Channels:', event.channels.includes(Channel.SSE));
         return (event.userId === userId && event.channels.includes(Channel.SSE));
       }),
       map((event: any) => {

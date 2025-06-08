@@ -16,7 +16,7 @@ import { EncryptionModule } from './encryption';
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
       { name: RecordEntry.name, schema: RecordEntrySchema },
     ]),
-    MongooseModule.forRoot('mongodb://mongodb:27017/medical-records'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/medical-records'),
     EncryptionModule,
   ],
   controllers: [RecordController],

@@ -30,6 +30,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
       const appointment = await this.prisma.appointment.create({
         data: {
           ...createAppointmentDto,
+          patientId: createAppointmentDto.patientId!, 
         },
       });
       this.logger.debug(
