@@ -23,4 +23,9 @@ export class DoctorController {
   getDoctors() {
     return this.doctorService.getDoctors();
   }
+
+  @MessagePattern(DOCTOR_PATTERNS.VERIFY_DOCTOR)
+  verifyDoctor(data: string) {
+    return this.doctorService.verifyDoctor(data);
+  }
 }

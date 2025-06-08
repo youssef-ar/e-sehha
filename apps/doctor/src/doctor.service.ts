@@ -23,4 +23,8 @@ export class DoctorService {
   async getDoctors() {
     return this.repo.findAll();
   }
+
+  async verifyDoctor(id: string) {
+    return this.repo.verifyDoctor(id);
+  }
 }
