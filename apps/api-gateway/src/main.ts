@@ -9,6 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
   const configService = app.get(ConfigService);
 
+  app.enableCors({
+    origin: configService.get<string>('FRONTEND_URL', 'http://localhost:4000'),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
