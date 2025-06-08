@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor
+  namespace: e-sihha
+  labels:
+    app: doctor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor
+  template:
+    metadata:
+      labels:
+        app: doctor
+    spec:
+      containers:
+        - name: doctor
+          image: youssefar22/doctor:latest
+          imagePullPolicy: Always
+          env:
+           envFrom:
+            - configMapRef:
+                name: doctor-config
+            - secretRef:
+                name: e-sihha-secrets
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          #readinessProbe:
+            #httpGet:
+              #path: /ping
+              #port: 3000
+          resources:
+            limits:
+              memory: "100Mi"
+            requests:
+              memory: "100Mi"
+              cpu: "50m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
