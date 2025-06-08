@@ -30,11 +30,6 @@ export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
     type: String,
     example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
   })
-  @IsOptional()
-  @IsString()
-  @IsUUID()
-  userId?: string;
-
   @ApiPropertyOptional({
     description: 'Filter by appointment status',
     enum: AppointmentStatusEnum,

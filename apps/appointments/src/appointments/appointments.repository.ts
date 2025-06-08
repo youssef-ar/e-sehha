@@ -10,7 +10,7 @@ import {
 } from '@app/contracts/appointments';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { PaginatedResponseDto } from '@app/contracts/pagination';
+// import { PaginatedResponseDto } from '@app/contracts/pagination';
 
 @Injectable()
 export class AppointmentsRepository implements IAppointmentsRepository {
@@ -30,7 +30,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
       const appointment = await this.prisma.appointment.create({
         data: {
           ...createAppointmentDto,
-          patientId: createAppointmentDto.patientId!, 
+          patientId: createAppointmentDto.patientId!,
         },
       });
       this.logger.debug(
@@ -46,9 +46,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
     }
   }
 
-  async findAll(
-    query: FindAllAppointmentsQueryDto,
-  ): Promise<PaginatedResponseDto<Appointment>> {
+  async findAll(query: FindAllAppointmentsQueryDto): Promise<Appointment[]> {
     const {
       page = 1,
       pageSize = 10,
@@ -105,7 +103,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
       this.logger.debug(
         `Repository: Found ${appointments.length} appointments, total count: ${total}`,
       );
-      return new PaginatedResponseDto(appointments, total, page, pageSize);
+      return appointments;
     } catch (error: unknown) {
       this.logger.error(
         'Repository: Failed to find appointments',
