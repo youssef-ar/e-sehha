@@ -61,6 +61,19 @@ export class DoctorController {
     }
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all doctors' })
+  @ApiResponse({ status: 200, description: 'List of doctors' })
+  async getDoctors() {
+    try {
+      const result = await this.doctorService.getDoctors();
+      return ResponseUtil.success('Doctors retrieved', result, HttpStatus.OK);
+    } catch (err) {
+      this.logger.error('Failed to get doctors', err);
+      throw err;
+    }
+  }
+
   @Patch('appointments/:id/accept')
   @ApiOperation({ summary: 'Accept an appointment' })
   @ApiParam({ name: 'id', description: 'Appointment ID' })

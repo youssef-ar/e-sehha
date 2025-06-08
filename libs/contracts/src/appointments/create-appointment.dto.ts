@@ -4,7 +4,7 @@ import {
   IsUUID,
   IsOptional,
 } from '@nestjs/class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsFutureDate } from '../validators';
 
@@ -13,6 +13,7 @@ export class CreateAppointmentDto {
   @IsString()
   //@IsUUID()
   @IsNotEmpty()
+  @ApiHideProperty()
   patientId: string;
 
   @ApiProperty({ description: 'The ID of the doctor', example: 'doctor-456' })
@@ -20,15 +21,6 @@ export class CreateAppointmentDto {
   //@IsUUID()
   @IsNotEmpty()
   doctorId: string;
-
-  @ApiProperty({
-    description: 'The ID of the user creating the appointment',
-    example: 'user-789',
-  })
-  @IsString()
-  @IsUUID()
-  @IsOptional()
-  userId?: string;
 
   @ApiProperty({
     description: 'The date and time of the appointment',

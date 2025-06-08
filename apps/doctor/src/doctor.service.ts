@@ -19,4 +19,8 @@ export class DoctorService {
   async getDoctorProfile(id: string) {
     return this.repo.findById(id);
   }
+
+  async getDoctors() {
+    return this.repo.findAll();
+  }
 }

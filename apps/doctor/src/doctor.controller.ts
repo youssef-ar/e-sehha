@@ -18,4 +18,9 @@ export class DoctorController {
   getDoctorProfile(data: string) {
     return this.doctorService.getDoctorProfile(data);
   }
+
+  @MessagePattern(DOCTOR_PATTERNS.GET_DOCTORS)
+  getDoctors() {
+    return this.doctorService.getDoctors();
+  }
 }

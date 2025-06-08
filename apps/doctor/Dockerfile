@@ -31,7 +31,6 @@ RUN npm ci --only=production
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist/apps/doctor ./dist/apps/doctor
-COPY --from=builder /app/dist/libs ./dist/libs
 
 # Set environment variables
 ENV NODE_ENV=production

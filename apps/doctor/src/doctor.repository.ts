@@ -21,5 +21,9 @@ export class DoctorRepository {
   async findById(id: string) {
     return this.doctorModel.findById(id);
   }
+
+  async findAll() {
+    return this.doctorModel.find();
+  }
   // Add more queries as needed
 }
