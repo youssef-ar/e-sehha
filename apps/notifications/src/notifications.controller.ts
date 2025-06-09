@@ -29,7 +29,6 @@ export class NotificationController {
   @EventPattern(NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS)
 async handleUpcomingAppointment(data: any) {
   console.log('Received upcoming appointment notification:', data);
-  
   await this.service.dispatch(data);
   
   this.eventEmitter.emit(data.type, data);

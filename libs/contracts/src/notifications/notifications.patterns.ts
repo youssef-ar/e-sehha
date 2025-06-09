@@ -3,4 +3,5 @@ export const NOTIFICATIONS_PATTERNS = {
     CANCELED_APPOINTMENTS: 'notifications.canceledAppointments',
     RESCHEDULED_APPOINTMENTS: 'notifications.rescheduledAppointments',
     DOCTOR_REGISTERED: 'notifications.doctorRegistered',
+    CONFIRMED_APPOINTMENTS: 'notifications.confirmedAppointments',
 };

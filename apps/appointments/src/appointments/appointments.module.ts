@@ -24,7 +24,36 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         }),
         inject: [ConfigService],
       },
+      {
+        name: 'DOCTOR_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672')],
+            queue: configService.get<string>('DOCTOR_QUEUE', 'doctor_queue'),
+            queueOptions: { durable: true },
+            socketOptions: { timeout: 5000 },
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: 'USER_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672')],
+            queue: configService.get<string>('USERS_QUEUE', 'users_queue'),
+            queueOptions: { durable: true },
+            socketOptions: { timeout: 5000 },
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
+    
   ],
   providers: [
     AppointmentsService,

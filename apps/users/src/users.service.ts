@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { clerkClient } from '@clerk/clerk-sdk-node';
+import e from 'express';
 @Injectable()
 export class UsersService {
   async getMe(id: string) {
@@ -48,7 +49,8 @@ export class UsersService {
       throw new Error('User not found');
     }
     const { username, firstName, lastName } = user;
-    return { username, firstName, lastName };
+    const email = user.emailAddresses[0]?.emailAddress
+    return { username, firstName, lastName, email };
   }
 
   async validateDoctor(email: string) {

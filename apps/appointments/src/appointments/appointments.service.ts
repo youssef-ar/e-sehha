@@ -11,6 +11,9 @@ import { Appointment } from '@prisma/client';
 import { PaginatedResponseDto } from '@app/contracts/pagination';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NOTIFICATIONS_PATTERNS } from '@app/contracts/notifications/notifications.patterns';
+import { lastValueFrom } from 'rxjs';
+import { DOCTOR_PATTERNS } from '@app/contracts/doctor/doctor.patterns';
+import { USERS_PATTERNS } from '@app/contracts';
 
 @Injectable()
 export class AppointmentsService {
@@ -22,6 +25,10 @@ export class AppointmentsService {
     @Inject('NOTIFICATIONS_SERVICE')
     private readonly notificationsClient: ClientProxy,
     private readonly eventEmitter: EventEmitter2,
+    @Inject('DOCTOR_SERVICE')
+    private readonly doctorClient: ClientProxy,
+    @Inject('USER_SERVICE')
+  private readonly userClient: ClientProxy,
   ) {}
 
   async create(
@@ -31,10 +38,14 @@ export class AppointmentsService {
   ) {
     const appointment =
       await this.appointmentsRepository.create(createAppointmentDto);
+
+    const doctor = await lastValueFrom(
+        this.doctorClient.send(DOCTOR_PATTERNS.GET_PROFILE, appointment.doctorId));
+    email = doctor.email || email;
     this.notificationsClient.emit(
       NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS,
       {
-        userId: appointment.patientId,
+        userId: appointment.doctorId,
         message: `You have an upcoming appointment on ${appointment.date}`,
         title: 'Upcoming Appointment',
         channels: ['email', 'sms', 'sse'],
@@ -81,6 +92,25 @@ export class AppointmentsService {
       id,
       updateAppointmentStatusDto,
     );
+    if (updateAppointmentStatusDto.status === 'CONFIRMED') {
+    
+      // Get patient email
+      const patient = await lastValueFrom(
+        this.userClient.send(USERS_PATTERNS.GET_USER_BY_ID, updated.patientId)
+      );
+      
+      this.notificationsClient.emit(
+        NOTIFICATIONS_PATTERNS.CONFIRMED_APPOINTMENTS,
+        {
+          userId: updated.patientId,
+          message: `Your appointment with Dr. ${updated.doctorName} on ${updated.date} has been confirmed.`,
+          title: 'Appointment Confirmed',
+          channels: ['email', 'sms', 'sse'],
+          type: NOTIFICATIONS_PATTERNS.CONFIRMED_APPOINTMENTS,
+          email: patient.email,
+        },
+      );
+  }
 
     this.logger.debug(`Updated appointment status with ID: ${id}`);
     return updated;
@@ -96,6 +126,10 @@ export class AppointmentsService {
     }
 
     const removed = await this.appointmentsRepository.delete(id);
+    const patient = await lastValueFrom(
+        this.userClient.send(USERS_PATTERNS.GET_USER_BY_ID, removed.patientId)
+      );
+    email = patient.email || email;
     this.notificationsClient.emit(
       NOTIFICATIONS_PATTERNS.CANCELED_APPOINTMENTS,
       {
