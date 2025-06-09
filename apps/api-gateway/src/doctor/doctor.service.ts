@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateDoctorDto } from '@app/contracts/doctor/create-doctor.dto';
 import { lastValueFrom } from 'rxjs';
@@ -61,6 +61,36 @@ export class DoctorService {
             id,
             updateAppointmentStatusDto: {
               status: AppointmentStatusEnum.CONFIRMED,
+            },
+          },
+        ),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'accept appointment');
+    }
+  }
+   async completedAppointment(id: string) {
+    try {
+      const appointment = await lastValueFrom(
+        this.appointmentsClient.send(
+          APPOINTMENTS_PATTERNS.FIND_ONE_APPOINTMENT,
+          id
+        )
+      );
+
+      if (appointment.status !== AppointmentStatusEnum.CONFIRMED) {
+        this.logger.warn(`Cannot complete appointment ${id}, status is ${appointment.status}`);
+        throw new BadRequestException(
+          'Appointment must be confirmed before it can be completed'
+        );
+      }
+      return await lastValueFrom(
+        this.appointmentsClient.send(
+          APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT_STATUS,
+          {
+            id,
+            updateAppointmentStatusDto: {
+              status: AppointmentStatusEnum.COMPLETED,
             },
           },
         ),

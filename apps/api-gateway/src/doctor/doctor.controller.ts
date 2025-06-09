@@ -85,6 +85,16 @@ export class DoctorController {
     const result = await this.doctorService.acceptAppointment(id);
     return ResponseUtil.success('Appointment accepted', result, HttpStatus.OK);
   }
+  @Patch('appointments/:id/complete')
+  @ApiOperation({ summary: 'Complete an appointment' })
+  @ApiParam({ name: 'id', description: 'Appointment ID' })
+  @ApiResponse({ status: 200, description: 'Appointment completed' })
+  @UseGuards(AuthGuard)
+  async complete(@Param('id') id: string, @CurrentUser('id') doctorId: string) {
+    this.logger.debug(`Doctor ${doctorId} completed appointment ${id}`);
+    const result = await this.doctorService.completedAppointment(id);
+    return ResponseUtil.success('Appointment accepted', result, HttpStatus.OK);
+  }
 
   @Patch('appointments/:id/reschedule')
   @ApiOperation({ summary: 'Reschedule an appointment' })
