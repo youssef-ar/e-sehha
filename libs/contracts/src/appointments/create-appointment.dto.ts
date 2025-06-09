@@ -26,6 +26,17 @@ export class CreateAppointmentDto {
   doctorId: string;
 
   @ApiProperty({
+    description: 'The name of the doctor',
+    example: 'Dr. Jane Smith',
+    type: String,
+    maxLength: 100,
+    minLength: 3,
+  })
+  @IsString()
+  @IsNotEmpty()
+  doctorName: string;
+
+  @ApiProperty({
     description: 'The ID of the user creating the appointment',
     example: 'user-789',
   })

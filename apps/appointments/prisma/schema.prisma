@@ -28,6 +28,7 @@ enum AppointmentType {
 model Appointment {
   id          String              @id @default(uuid())
   patientId   String
+  doctorName String
   doctorId    String
   date        DateTime
   status      AppointmentStatus   @default(PENDING)

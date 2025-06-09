@@ -19,6 +19,14 @@ export class Appointment implements PrismaAppointment {
     description: 'Identifier for the patient',
   })
   patientId: string;
+  @ApiProperty({
+    example: 'Dr. John Doe',
+    description: 'Name of the doctor for the appointment',
+    type: String,
+    maxLength: 100,
+    minLength: 3,
+  })
+  doctorName: string;
 
   @ApiProperty({
     example: 'user_2f...',
