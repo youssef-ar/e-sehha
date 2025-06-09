@@ -7,7 +7,7 @@ import {
   IsEnum,
   IsPositive,
 } from '@nestjs/class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsFutureDate } from '../validators';
 import { AppointmentTypeEnum } from './appointment-type.enum';
@@ -53,7 +53,7 @@ export class CreateAppointmentDto {
 
   @ApiProperty({
     description: 'The price of the appointment',
-    example: 150.00,
+    example: 150.0,
   })
   @IsNumber()
   @IsPositive()

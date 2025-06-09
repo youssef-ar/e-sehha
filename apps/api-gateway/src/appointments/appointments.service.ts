@@ -19,7 +19,8 @@ export class AppointmentsService {
   private readonly logger = new Logger(AppointmentsService.name);
 
   constructor(
-    @Inject(APPOINTMENTS_SERVICE) private readonly appointmentsClient: ClientProxy,
+    @Inject(APPOINTMENTS_SERVICE)
+    private readonly appointmentsClient: ClientProxy,
   ) {}
 
   async create(
@@ -44,22 +45,18 @@ export class AppointmentsService {
     }
   }
 
-  async findAll(
-    query: FindAllAppointmentsQueryDto,
-  ): Promise<PaginatedResponseDto<Appointment>> {
+  async findAll(query: FindAllAppointmentsQueryDto): Promise<Appointment[]> {
     this.logger.debug(
       `API Gateway: Sending findAll appointments request with query: ${JSON.stringify(query)}`,
     );
     try {
-      const result: PaginatedResponseDto<Appointment> = await lastValueFrom(
+      const result: Appointment[] = await lastValueFrom(
         this.appointmentsClient.send(
           APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS,
           query,
         ),
       );
-      this.logger.debug(
-        `API Gateway: Found ${result?.data?.length} appointments, total: ${result?.total}`,
-      );
+
       return result;
     } catch (error) {
       handleRpcError(error, this.logger, 'find all appointments');

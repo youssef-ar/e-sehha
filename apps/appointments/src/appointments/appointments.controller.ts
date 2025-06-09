@@ -38,7 +38,7 @@ export class AppointmentsController {
   @MessagePattern(APPOINTMENTS_PATTERNS.FIND_ALL_APPOINTMENTS)
   async findAll(
     @Payload() query: FindAllAppointmentsQueryDto,
-  ): Promise<PaginatedResponseDto<Appointment>> {
+  ): Promise<Appointment[]> {
     this.logger.debug(
       `Finding all appointments with query: ${JSON.stringify(query)}`,
     );

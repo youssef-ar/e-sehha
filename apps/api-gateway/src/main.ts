@@ -9,6 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
   const configService = app.get(ConfigService);
 
+  app.enableCors({
+    origin: configService.get<string>('FRONTEND_URL', 'http://localhost:4000'),
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -43,7 +49,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   const port = configService.get<number>('PORT', 3000);
-  await app.listen(port);
+  await app.listen(3001);
   console.log(`API Gateway listening on port ${port}`);
   console.log(`API Documentation available at /api-docs`);
 }

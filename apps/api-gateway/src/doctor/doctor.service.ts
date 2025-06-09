@@ -31,7 +31,7 @@ export class DoctorService {
   async registerDoctor(dto: CreateDoctorDto) {
     this.logger.debug(`Registering doctor: ${JSON.stringify(dto)}`);
     try {
-      this.usersClient.send(USERS_PATTERNS.CREATE_DOCTOR, dto.email);
+      //this.usersClient.send(USERS_PATTERNS.CREATE_DOCTOR, dto.email);
       const result = await lastValueFrom(
         this.doctorClient.send(DOCTOR_PATTERNS.REGISTER, dto),
       );
@@ -39,6 +39,16 @@ export class DoctorService {
       return result;
     } catch (err) {
       handleRpcError(err, this.logger, 'register doctor');
+    }
+  }
+
+  async getDoctors() {
+    try {
+      return await lastValueFrom(
+        this.doctorClient.send(DOCTOR_PATTERNS.GET_DOCTORS, {}),
+      );
+    } catch (error) {
+      handleRpcError(error, this.logger, 'get doctors');
     }
   }
 

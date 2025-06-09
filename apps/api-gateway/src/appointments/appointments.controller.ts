@@ -108,13 +108,21 @@ export class AppointmentsController {
   async findAll(
     @Query() query: FindAllAppointmentsQueryDto,
     @CurrentUser('id') userId: string,
+    @CurrentUser('role') role: string,
   ) {
     this.logger.debug(
       `Getting appointments with query: ${JSON.stringify(query)}`,
     );
 
     try {
-      query.userId = userId;
+      if (role === 'ADMIN') {
+        query.doctorId = userId;
+        query.patientId = undefined;
+      } else {
+        query.patientId = userId;
+        query.doctorId = undefined;
+      }
+
       const result = await this.appointmentsService.findAll(query);
       this.logger.debug('Retrieved appointments');
       return ResponseUtil.success(

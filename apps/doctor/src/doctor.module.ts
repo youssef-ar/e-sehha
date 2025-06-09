@@ -5,6 +5,7 @@ import { DoctorController } from './doctor.controller';
 import { DoctorService } from './doctor.service';
 import { DoctorRepository } from './doctor.repository';
 import { DoctorSchema } from './schema/doctor.schema';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -25,6 +26,21 @@ import { DoctorSchema } from './schema/doctor.schema';
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([{ name: 'Doctor', schema: DoctorSchema }]),
+    ClientsModule.registerAsync([
+          {
+            name: 'NOTIFICATIONS_SERVICE',
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+              transport: Transport.RMQ,
+              options: {
+                urls: [configService.get<string>('RABBITMQ_URL', 'amqp://localhost:5672')],
+                queue: configService.get<string>('NOTIFICATIONS_QUEUE', 'notifications_queue'),
+                queueOptions: { durable: true },
+              },
+            }),
+            inject: [ConfigService],
+          },
+        ]),
   ],
   controllers: [DoctorController],
   providers: [DoctorService, DoctorRepository],
