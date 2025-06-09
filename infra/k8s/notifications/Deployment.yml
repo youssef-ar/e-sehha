@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications
+  namespace: e-sihha
+  labels:
+    app: notifications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifications
+  template:
+    metadata:
+      labels:
+        app: notifications
+    spec:
+      containers:
+        - name: notifications
+          image: youssefar22/notifications:latest
+          imagePullPolicy: Always
+          env:
+           envFrom:
+            - configMapRef:
+                name: notifications-config
+            - secretRef:
+                name: e-sihha-secrets
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          #readinessProbe:
+            #httpGet:
+              #path: /ping
+              #port: 3000
+          resources:
+            limits:
+              memory: "100Mi"
+            requests:
+              memory: "100Mi"
+              cpu: "50m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault

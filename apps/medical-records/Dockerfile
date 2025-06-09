@@ -9,6 +9,8 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY . .
 
+RUN npx prisma generate --schema=apps/appointments/prisma/schema.prisma
+
 RUN npm run build medical-records
 
 FROM node:22-bookworm-slim AS production

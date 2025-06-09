@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medical-records
+  namespace: e-sihha
+  labels:
+    app: medical-records
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: medical-records
+  template:
+    metadata:
+      labels:
+        app: medical-records
+    spec:
+      containers:
+        - name: medical-records
+          image: youssefar22/medical-records:latest
+          imagePullPolicy: Always
+          env:
+           envFrom:
+            - configMapRef:
+                name: medical-records-config
+            - secretRef:
+                name: e-sihha-secrets
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          #readinessProbe:
+            #httpGet:
+              #path: /ping
+              #port: 3000
+          resources:
+            limits:
+              memory: "100Mi"
+            requests:
+              memory: "100Mi"
+              cpu: "50m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
