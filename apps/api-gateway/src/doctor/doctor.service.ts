@@ -120,8 +120,13 @@ export class DoctorService {
     try {
       return await lastValueFrom(
         this.appointmentsClient.send(
-          APPOINTMENTS_PATTERNS.REMOVE_APPOINTMENT,
-          id,
+          APPOINTMENTS_PATTERNS.UPDATE_APPOINTMENT_STATUS,
+          {
+            id,
+            updateAppointmentStatusDto: {
+              status: AppointmentStatusEnum.CANCELLED,
+            },
+          },
         ),
       );
     } catch (error) {
