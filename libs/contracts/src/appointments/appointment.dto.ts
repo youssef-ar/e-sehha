@@ -29,6 +29,12 @@ export class Appointment implements PrismaAppointment {
   doctorName: string;
 
   @ApiProperty({
+    example: 'johndoe@exemple.com',
+    description: 'email of the doctor',
+  })
+  email: string;
+
+  @ApiProperty({
     example: 'user_2g...',
     description: 'Identifier for the patient',
   })

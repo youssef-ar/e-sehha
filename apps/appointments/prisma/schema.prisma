@@ -30,6 +30,7 @@ model Appointment {
   patientId   String
   doctorName String
   doctorId    String
+  email       String
   patientName String
   date        DateTime
   status      AppointmentStatus   @default(PENDING)

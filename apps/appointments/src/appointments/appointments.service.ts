@@ -39,9 +39,6 @@ export class AppointmentsService {
     const appointment =
       await this.appointmentsRepository.create(createAppointmentDto);
 
-    const doctor = await lastValueFrom(
-        this.doctorClient.send(DOCTOR_PATTERNS.GET_PROFILE, appointment.doctorId));
-    email = doctor.email || email;
     this.notificationsClient.emit(
       NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS,
       {
@@ -50,7 +47,7 @@ export class AppointmentsService {
         title: 'Upcoming Appointment',
         channels: ['email', 'sms', 'sse'],
         type: NOTIFICATIONS_PATTERNS.UPCUMMING_APPOINTMENTS,
-        email: email,
+        email: appointment.email,
         phone: phone,
       },
     );

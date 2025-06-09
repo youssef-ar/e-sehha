@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsEnum,
   IsPositive,
+  IsEmail,
 } from '@nestjs/class-validator';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -71,6 +72,14 @@ export class CreateAppointmentDto {
   @IsString()
   @IsNotEmpty()
   time: string;
+
+  
+  @ApiProperty({
+    description: 'The email of the doctor',
+    example: 'johndoe@exemple.com'})
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 
   @ApiProperty({
     description: 'The price of the appointment',
