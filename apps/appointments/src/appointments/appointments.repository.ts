@@ -47,16 +47,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
   }
 
   async findAll(query: FindAllAppointmentsQueryDto): Promise<Appointment[]> {
-    const {
-      page = 1,
-      pageSize = 10,
-      patientId,
-      doctorId,
-      status,
-      dateFrom,
-      dateTo,
-    } = query;
-    const skip = (page - 1) * pageSize;
+    const { patientId, doctorId, userId, status, date } = query;
     const where: Prisma.AppointmentWhereInput = {};
 
     if (patientId) {
@@ -64,6 +55,10 @@ export class AppointmentsRepository implements IAppointmentsRepository {
     }
     if (doctorId) {
       where.doctorId = doctorId;
+    }
+    if (userId) {
+      // userId can filter by either patientId or doctorId
+      where.OR = [{ patientId: userId }, { doctorId: userId }];
     }
     if (status) {
       if (
@@ -74,27 +69,27 @@ export class AppointmentsRepository implements IAppointmentsRepository {
         this.logger.warn(`Invalid status filter: ${status}`);
       }
     }
-    if (dateFrom || dateTo) {
-      where.date = {};
-      if (dateFrom) {
-        where.date.gte = dateFrom;
-      }
-      if (dateTo) {
-        where.date.lte = dateTo;
-      }
+    if (date) {
+      console.log(`Filtering by date: ${date}`);
+      // Filter by specific date (start of day to end of day)
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      where.date = {
+        gte: startOfDay,
+        lte: endOfDay,
+      };
     }
 
     try {
-      this.logger.debug(
-        `Repository: Finding appointments with filter: ${JSON.stringify(where)}, page: ${page}, pageSize: ${pageSize}`,
-      );
       const [appointments, total] = await this.prisma.$transaction([
         this.prisma.appointment.findMany({
           where,
-          skip,
-          take: pageSize,
           orderBy: {
-            createdAt: 'desc',
+            date: 'desc',
           },
         }),
         this.prisma.appointment.count({ where }),
