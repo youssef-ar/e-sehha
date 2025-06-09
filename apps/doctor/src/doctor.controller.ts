@@ -11,14 +11,14 @@ export class DoctorController {
 
   @MessagePattern(DOCTOR_PATTERNS.REGISTER)
   registerDoctor(@Payload() payload: CreateDoctorDto) {
-    console.log("Registering doctor with payload:", payload);
-    console.log("Doctor DTO:", payload);
+    console.log('Registering doctor with payload:', payload);
+    console.log('Doctor DTO:', payload);
     return this.doctorService.registerDoctor(payload);
   }
 
   @MessagePattern(DOCTOR_PATTERNS.GET_PROFILE)
-  getDoctorProfile(@Payload() payload: { id: string }) {
-    return this.doctorService.getDoctorProfile(payload.id);
+  getDoctorProfile(@Payload() payload: string) {
+    return this.doctorService.getDoctorProfile(payload);
   }
 
   @MessagePattern(DOCTOR_PATTERNS.GET_DOCTORS)
