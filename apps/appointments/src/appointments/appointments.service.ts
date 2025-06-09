@@ -89,7 +89,7 @@ export class AppointmentsService {
       id,
       updateAppointmentStatusDto,
     );
-    if (updateAppointmentStatusDto.status === 'CONFIRMED') {
+    /* if (updateAppointmentStatusDto.status === 'CONFIRMED') {
     
       // Get patient email
       const patient = await lastValueFrom(
@@ -107,7 +107,7 @@ export class AppointmentsService {
           email: patient.email,
         },
       );
-  }
+  } */
 
     this.logger.debug(`Updated appointment status with ID: ${id}`);
     return updated;
