@@ -27,7 +27,7 @@ import { RescheduleAppointmentDto } from '@app/contracts/appointments';
 import { RecordEntryDto } from '@app/contracts/medical-records/record-entry.dto';
 import { AuthGuard, CurrentUser } from '@app/shared-auth';
 
-@UseGuards(AuthGuard)
+//@UseGuards(AuthGuard)
 @ApiTags('Doctors')
 @Controller('doctors')
 export class DoctorController {
@@ -48,7 +48,7 @@ export class DoctorController {
   ) {
     this.logger.debug(`Registering doctor: ${JSON.stringify(dto)}`);
     try {
-      dto.userId = userId;
+      //dto.userId = userId;
       const result = await this.doctorService.registerDoctor(dto);
       return ResponseUtil.success(
         'Doctor registered',
@@ -64,6 +64,7 @@ export class DoctorController {
   @Get()
   @ApiOperation({ summary: 'Get all doctors' })
   @ApiResponse({ status: 200, description: 'List of doctors' })
+  @UseGuards(AuthGuard)
   async getDoctors() {
     try {
       const result = await this.doctorService.getDoctors();
@@ -78,6 +79,7 @@ export class DoctorController {
   @ApiOperation({ summary: 'Accept an appointment' })
   @ApiParam({ name: 'id', description: 'Appointment ID' })
   @ApiResponse({ status: 200, description: 'Appointment accepted' })
+  @UseGuards(AuthGuard)
   async accept(@Param('id') id: string, @CurrentUser('id') doctorId: string) {
     this.logger.debug(`Doctor ${doctorId} accepting appointment ${id}`);
     const result = await this.doctorService.acceptAppointment(id);
@@ -89,6 +91,7 @@ export class DoctorController {
   @ApiParam({ name: 'id', description: 'Appointment ID' })
   @ApiBody({ type: RescheduleAppointmentDto })
   @ApiResponse({ status: 200, description: 'Appointment rescheduled' })
+  @UseGuards(AuthGuard)
   async reschedule(
     @Param('id') id: string,
     @Body() dto: RescheduleAppointmentDto,
@@ -107,6 +110,7 @@ export class DoctorController {
   @ApiOperation({ summary: 'Cancel an appointment' })
   @ApiParam({ name: 'id', description: 'Appointment ID' })
   @ApiResponse({ status: 200, description: 'Appointment cancelled' })
+  @UseGuards(AuthGuard)
   async cancel(@Param('id') id: string, @CurrentUser('id') doctorId: string) {
     this.logger.debug(`Doctor ${doctorId} cancelling appointment ${id}`);
     const result = await this.doctorService.cancelAppointment(id);
@@ -121,6 +125,7 @@ export class DoctorController {
     status: 201,
     description: 'Medical record entry created/updated',
   })
+  @UseGuards(AuthGuard)
   async createOrUpdateMedicalRecord(
     @Param('patientId') patientId: string,
     @Body() entry: RecordEntryDto,
@@ -144,6 +149,7 @@ export class DoctorController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'List of patient records' })
+  @UseGuards(AuthGuard)
   async getAllPatientRecords(
     @Req() req,
     @Query('page') page = 1,
@@ -166,6 +172,7 @@ export class DoctorController {
   @ApiOperation({ summary: 'Get a specific patient record' })
   @ApiParam({ name: 'patientId', description: 'Patient ID' })
   @ApiResponse({ status: 200, description: 'Patient record details' })
+  @UseGuards(AuthGuard)
   async getPatientRecord(@Param('patientId') patientId: string, @Req() req) {
     this.logger.debug(`Getting record for patient ${patientId}`);
     const result = await this.doctorService.getPatientRecord(
@@ -185,6 +192,7 @@ export class DoctorController {
   @ApiParam({ name: 'recordId', description: 'Record ID' })
   @ApiBody({ type: RecordEntryDto })
   @ApiResponse({ status: 200, description: 'Record entry updated' })
+  @UseGuards(AuthGuard)
   async updateRecordEntry(
     @Param('patientId') patientId: string,
     @Param('recordId') recordId: string,
@@ -209,6 +217,7 @@ export class DoctorController {
   @ApiParam({ name: 'recordId', description: 'Record ID' })
   @ApiBody({ type: String, description: 'Doctor ID to authorize' })
   @ApiResponse({ status: 200, description: 'Doctor authorized successfully' })
+  @UseGuards(AuthGuard)
   async authorizeDoctorForRecord(
     @Param('patientId') patientId: string,
     @Param('recordId') recordId: string,
@@ -235,6 +244,7 @@ export class DoctorController {
   @ApiOperation({ summary: 'Remove a patient record' })
   @ApiParam({ name: 'patientId', description: 'Patient ID' })
   @ApiResponse({ status: 200, description: 'Patient record removed' })
+  @UseGuards(AuthGuard)
   async removePatientRecord(@Param('patientId') patientId: string) {
     this.logger.debug(`Removing record for patient ${patientId}`);
     const result = await this.doctorService.removePatientRecord(patientId);
@@ -252,6 +262,7 @@ export class DoctorController {
     status: 200,
     description: 'Doctor profile retrieved successfully',
   })
+  @UseGuards(AuthGuard)
   async getDoctorProfile(@Param('id') id: string) {
     this.logger.debug(`Getting profile for doctor ${id}`);
     const result = await this.doctorService.getDoctorProfile(id);

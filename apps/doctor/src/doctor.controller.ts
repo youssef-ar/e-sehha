@@ -10,8 +10,10 @@ export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}
 
   @MessagePattern(DOCTOR_PATTERNS.REGISTER)
-  registerDoctor(@Payload() payload: { data: CreateDoctorDto }) {
-    return this.doctorService.registerDoctor(payload.data);
+  registerDoctor(@Payload() payload: CreateDoctorDto) {
+    console.log("Registering doctor with payload:", payload);
+    console.log("Doctor DTO:", payload);
+    return this.doctorService.registerDoctor(payload);
   }
 
   @MessagePattern(DOCTOR_PATTERNS.GET_PROFILE)

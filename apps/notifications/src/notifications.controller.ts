@@ -52,6 +52,11 @@ async handleCancelledAppointment(data: any) {
   
   this.eventEmitter.emit(data.type, data);
 }
+@EventPattern(NOTIFICATIONS_PATTERNS.DOCTOR_REGISTERED)
+async handleDoctorRegistered(data: any) {
+  await this.service.dispatch(data);
+  console.log('Received doctor registered notification:', data);
+}
   
   @Sse('sse')
   @UseGuards(AuthGuard)

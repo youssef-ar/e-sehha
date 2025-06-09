@@ -51,7 +51,7 @@ export const DoctorSchema = new Schema(
       unique: true,
       trim: true,
     },
-    location: {
+    
       address: {
         type: String,
         required: [true, 'Address is required'],
@@ -72,7 +72,7 @@ export const DoctorSchema = new Schema(
         required: [true, 'Zip code is required'],
         trim: true,
       },
-    },
+    
     availability: {
       workingHours: {
         monday: { start: String, end: String },
@@ -120,12 +120,16 @@ export interface Doctor extends Document {
   bio: string;
   verified: boolean;
   licenseNumber: string;
-  location: {
+  /* location: {
     address: string;
     city: string;
     state: string;
     zipCode: string;
-  };
+  }; */
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
   availability: {
     workingHours: {
       [key: string]: { start: string; end: string };
