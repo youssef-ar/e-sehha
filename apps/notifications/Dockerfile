@@ -11,7 +11,7 @@ COPY . .
 
 RUN npx prisma generate --schema=apps/appointments/prisma/schema.prisma
 
-RUN npm run build symptom-checker
+RUN npm run build notifications
 
 FROM node:22-bookworm-slim AS production
 
@@ -26,4 +26,4 @@ COPY --from=builder /e-sihha/dist ./dist
 
 EXPOSE 3000
 
-CMD ["node", "dist/apps/symptom-checker/main.js"]
+CMD ["node", "dist/apps/notifications/main.js"]

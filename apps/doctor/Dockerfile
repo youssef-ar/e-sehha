@@ -1,43 +1,31 @@
-# Build stage
-FROM node:20-alpine AS builder
+FROM node:22-bookworm-slim AS builder
 
-WORKDIR /app
+WORKDIR /e-sihha
 
-# Copy package files
-COPY package*.json ./
-COPY tsconfig*.json ./
-COPY nest-cli.json ./
+COPY package.json package-lock.json ./
 
-# Copy source code
-COPY apps/doctor ./apps/doctor
-COPY libs ./libs
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
 
-# Install dependencies
-RUN npm ci
 
-# Build the application
+COPY . .
+
+RUN npx prisma generate --schema=apps/appointments/prisma/schema.prisma
+
+
 RUN npm run build doctor
 
-# Production stage
-FROM node:20-alpine
+FROM node:22-bookworm-slim AS production
 
-WORKDIR /app
+WORKDIR /e-sihha
 
-# Copy package files
-COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist/apps/doctor ./dist/apps/doctor
-
-# Set environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
 
-# Expose the port
+COPY package.json package-lock.json ./
+RUN npm install --only=production
+
+COPY --from=builder /e-sihha/dist ./dist
+
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/apps/doctor/main"] 
+CMD ["node", "dist/apps/doctor/main.js"]

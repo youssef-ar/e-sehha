@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: symptom-checker
+  namespace: e-sihha
+  labels:
+    app: symptom-checker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: symptom-checker
+  template:
+    metadata:
+      labels:
+        app: symptom-checker
+    spec:
+      containers:
+        - name: symptom-checker
+          image: youssefar22/symptom-checker:latest
+          imagePullPolicy: Always
+          env:
+           envFrom:
+            - configMapRef:
+                name: symptom-checker-config
+            - secretRef:
+                name: e-sihha-secrets
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          #readinessProbe:
+            #httpGet:
+              #path: /ping
+              #port: 3000
+          resources:
+            limits:
+              memory: "100Mi"
+            requests:
+              memory: "100Mi"
+              cpu: "50m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
