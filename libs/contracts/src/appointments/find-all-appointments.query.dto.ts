@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { AppointmentStatusEnum } from './appointment-status.enum';
 import { PaginationQueryDto } from '../pagination';
 
@@ -51,4 +58,14 @@ export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
   @Type(() => Date)
   @IsDate()
   date?: Date;
+
+  @ApiPropertyOptional({
+    description: 'Filter by patient email address',
+    type: String,
+    example: 'patient@example.com',
+  })
+  @IsOptional()
+  @IsString()
+  @IsEmail()
+  email?: string;
 }

@@ -47,7 +47,7 @@ export class AppointmentsRepository implements IAppointmentsRepository {
   }
 
   async findAll(query: FindAllAppointmentsQueryDto): Promise<Appointment[]> {
-    const { patientId, doctorId, userId, status, date } = query;
+    const { patientId, doctorId, userId, status, date, email } = query;
     const where: Prisma.AppointmentWhereInput = {};
 
     if (patientId) {
@@ -82,6 +82,9 @@ export class AppointmentsRepository implements IAppointmentsRepository {
         gte: startOfDay,
         lte: endOfDay,
       };
+    }
+    if (email) {
+      where.email = email;
     }
 
     try {
