@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: e-sihha
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: youssefar22/api-gateway:latest
+          imagePullPolicy: Always
+          env:
+            envFrom:
+            - configMapRef:
+                name: api-gateway-config
+            - secretRef:
+                name: e-sihha-secrets
+          resources:
+            limits:
+              memory: "50Mi"
+            requests:
+              memory: "50Mi"
+              cpu: "100m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      imagePullSecrets:
+        - name: dockerconfigjson
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault

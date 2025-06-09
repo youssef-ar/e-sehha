@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointments
+  namespace: e-sihha
+  labels:
+    app: appointments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appointments
+  template:
+    metadata:
+      labels:
+        app: appointments
+    spec:
+      containers:
+        - name: appointments
+          image: youssefar22/appointments:latest
+          imagePullPolicy: Always
+          env:
+           envFrom:
+            - configMapRef:
+                name: appointments-config
+            - secretRef:
+                name: e-sihha-secrets
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          #readinessProbe:
+            #httpGet:
+              #path: /ping
+              #port: 3000
+          resources:
+            limits:
+              memory: "100Mi"
+            requests:
+              memory: "100Mi"
+              cpu: "50m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
