@@ -22,7 +22,6 @@ export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
   })
   @IsOptional()
   @IsString()
-  @IsUUID()
   doctorId?: string;
 
   @ApiPropertyOptional({
@@ -30,6 +29,11 @@ export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
     type: String,
     example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
   })
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  userId?: string;
+
   @ApiPropertyOptional({
     description: 'Filter by appointment status',
     enum: AppointmentStatusEnum,
@@ -39,22 +43,12 @@ export class FindAllAppointmentsQueryDto extends PaginationQueryDto {
   status?: AppointmentStatusEnum;
 
   @ApiPropertyOptional({
-    description: 'Filter appointments from this date (inclusive)',
+    description: 'Filter appointments by specific date',
     type: Date,
     example: '2025-05-01T00:00:00.000Z',
   })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  dateFrom?: Date;
-
-  @ApiPropertyOptional({
-    description: 'Filter appointments up to this date (inclusive)',
-    type: Date,
-    example: '2025-05-31T23:59:59.999Z',
-  })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  dateTo?: Date;
+  date?: Date;
 }
