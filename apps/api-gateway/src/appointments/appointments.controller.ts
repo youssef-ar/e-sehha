@@ -115,12 +115,8 @@ export class AppointmentsController {
     );
 
     try {
-      if (role === 'ADMIN') {
-        query.doctorId = userId;
-        query.patientId = undefined;
-      } else {
+      if (role !== 'doctor') {
         query.patientId = userId;
-        query.doctorId = undefined;
       }
 
       const result = await this.appointmentsService.findAll(query);
